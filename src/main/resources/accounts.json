@@ -1,0 +1,8 @@
+{
+  "accounts": [
+  {"login": "maxim", "password": "12345", "isAdmin": true},
+  {"login": "anton", "password": "222", "isAdmin": false}
+  ]
+}
+
+
