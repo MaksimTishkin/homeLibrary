@@ -1,4 +1,4 @@
-package com.epam.tishkin.authorization.exceptions;
+package com.epam.tishkin.authorization.exception;
 
 public class InvalidAutorizationException extends Exception {
 

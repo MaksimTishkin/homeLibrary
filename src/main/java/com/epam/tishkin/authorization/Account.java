@@ -1,6 +1,6 @@
 package com.epam.tishkin.authorization;
 
-public class Customer {
+public class Account {
     private String login;
     private String password;
     private boolean isAdmin;
@@ -15,10 +15,5 @@ public class Customer {
 
     public boolean getIsAdmin() {
         return isAdmin;
-    }
-
-    @Override
-    public String toString() {
-        return login + " " + password + " " + isAdmin;
     }
 }
