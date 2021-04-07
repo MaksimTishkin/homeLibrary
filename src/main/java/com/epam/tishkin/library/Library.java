@@ -12,4 +12,16 @@ public class Library {
         }
         return authors;
     }
+
+    public void addBook(Book book) {
+        for (Author author : authors) {
+            if (book.getAuthor().equals(author.getName())) {
+                author.getBooks().add(book);
+                return;
+            }
+        }
+        Author author = new Author(book.getAuthor());
+        author.getBooks().add(book);
+        authors.add(author);
+    }
 }

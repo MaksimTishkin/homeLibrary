@@ -7,20 +7,24 @@ import java.io.FileReader;
 import java.io.IOException;
 
 public abstract class Visitor {
-    String name;
+    private String name;
+    private Library library;
 
     Visitor(String name) {
         this.name = name;
+        getLibraryFromJSON();
     }
 
-    public Library getLibraryFromJSON() {
-        Library myLibrary = null;
+    public void getLibraryFromJSON() {
         try (FileReader reader = new FileReader("src/main/resources/library.json")) {
             Gson gson = new Gson();
-            myLibrary = gson.fromJson(reader, Library.class);
+            library = gson.fromJson(reader, Library.class);
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return myLibrary;
+    }
+
+    public Library getLibrary() {
+        return library;
     }
 }

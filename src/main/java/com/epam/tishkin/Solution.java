@@ -17,7 +17,6 @@ import java.io.InputStreamReader;
 
 public class Solution {
     static Visitor visitor;
-    static Library library;
 
     public static void main(String[] args) {
         String login;
@@ -29,6 +28,14 @@ public class Solution {
             System.out.println("Enter your password");
             password = consoleReader.readLine();
             authorization(login, password);
+            for (Author x : visitor.getLibrary().getAuthors()) {
+                System.out.println(x);
+            }
+            Book book = new Book("Crime and punishment", "Dostoevsry", 5564, 1895);
+            visitor.getLibrary().addBook(book);
+            for (Author x : visitor.getLibrary().getAuthors()) {
+                System.out.println(x);
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -42,6 +49,5 @@ public class Solution {
         } catch (InvalidAutorizationException e) {
             System.out.println("Invalid login/password");
         }
-        library = visitor.getLibraryFromJSON();
     }
 }
