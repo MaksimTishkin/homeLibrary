@@ -4,13 +4,13 @@
       "name": "Pushkin",
       "books": [
         {
-          "name": "Ruslan and Lyudmila",
+          "title": "Ruslan and Lyudmila",
           "author": "Pushkin",
           "ISBNNumber": 11445,
           "year": 1820
         },
         {
-          "name": "Сaptain's daughter",
+          "title": "Сaptain's daughter",
           "author": "Pushkin",
           "ISBNNumber": 18896,
           "year": 1841
@@ -21,13 +21,13 @@
       "name": "Lermontov",
       "books": [
         {
-          "name": "Borodino",
+          "title": "Borodino",
           "author": "Lermontov",
           "ISBNNumber": 22547,
           "year": 1937
         },
         {
-          "name": "Mtsyri",
+          "title": "Mtsyri",
           "author": "Lermontov",
           "ISBNNumber": 99965,
           "year": 1838

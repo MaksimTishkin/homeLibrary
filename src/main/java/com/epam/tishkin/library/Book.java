@@ -1,20 +1,20 @@
 package com.epam.tishkin.library;
 
 public class Book {
-    private String name;
+    private String title;
     private String author;
     private long ISBNNumber;
     private int year;
 
-    public Book(String name, String author, long ISBNNumber, int year) {
-        this.name = name;
+    public Book(String title, String author, long ISBNNumber, int year) {
+        this.title = title;
         this.author = author;
         this.ISBNNumber = ISBNNumber;
         this.year = year;
     }
 
-    public String getName() {
-        return name;
+    public String getTitle() {
+        return title;
     }
 
     public String getAuthor() {
@@ -31,6 +31,6 @@ public class Book {
 
     @Override
     public String toString() {
-        return name + " " + ISBNNumber + " " + year;
+        return title + " " + ISBNNumber + " " + year;
     }
 }
