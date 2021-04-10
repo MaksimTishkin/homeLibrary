@@ -7,12 +7,21 @@ public class Book {
     private final String author;
     private final long ISBNumber;
     private final int year;
+    private final int pagesNumber;
+    private Bookmark bookmark;
 
-    public Book(String title, String author, long ISBNumber, int year) {
+    public Book(String title, String author, long ISBNumber, int year, int pagesNumber) {
         this.title = title;
         this.author = author;
         this.ISBNumber = ISBNumber;
         this.year = year;
+        this.pagesNumber = pagesNumber;
+    }
+
+    public void setBookmark(int page) {
+        if (page > 0 && page < pagesNumber) {
+            bookmark = new Bookmark(page);
+        }
     }
 
     public String getTitle() {
@@ -29,6 +38,10 @@ public class Book {
 
     public int getYear() {
         return year;
+    }
+
+    public int getPagesNumber() {
+        return pagesNumber;
     }
 
     @Override

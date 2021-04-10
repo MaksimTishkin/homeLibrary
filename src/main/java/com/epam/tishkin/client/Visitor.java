@@ -1,5 +1,6 @@
 package com.epam.tishkin.client;
 
+import com.epam.tishkin.library.Author;
 import com.epam.tishkin.library.Book;
 import com.epam.tishkin.library.Library;
 import com.google.gson.Gson;
@@ -8,6 +9,8 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.Collections;
+import java.util.Comparator;
 
 public abstract class Visitor {
     private String name;
@@ -16,6 +19,7 @@ public abstract class Visitor {
     Visitor(String name) {
         this.name = name;
         getLibraryFromJSON();
+        library.getAuthors().sort(Comparator.comparing(Author::getName));
     }
 
     private void getLibraryFromJSON() {
@@ -28,11 +32,12 @@ public abstract class Visitor {
     }
 
     public void startLibraryUse() {
-        String request = null;
+        String request;
         String bookTitle;
         String bookAuthor;
         long ISBNumber;
         int year;
+        int pagesNumber;
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(System.in))) {
             while(true) {
                 System.out.println("1 Add a new book");
@@ -61,7 +66,14 @@ public abstract class Visitor {
                             System.out.println("Incorrect year of publication" + "\n");
                             break;
                         }
-                        if (library.addBook(bookTitle, bookAuthor, ISBNumber, year)) {
+                        System.out.println("Enter the number of pages");
+                        try {
+                            pagesNumber = Integer.parseInt(reader.readLine());
+                        } catch (NumberFormatException e) {
+                            System.out.println("Incorrect number of pages" + "\n");
+                            break;
+                        }
+                        if (library.addBook(bookTitle, bookAuthor, ISBNumber, year, pagesNumber)) {
                             System.out.println("Book has been added" + "\n");
                         } else {
                             System.out.println("Such a book already exists" + "\n");

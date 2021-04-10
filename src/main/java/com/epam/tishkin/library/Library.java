@@ -1,11 +1,10 @@
 package com.epam.tishkin.library;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 public class Library {
     private List<Author> authors;
+    Comparator<Author> authorComparator = Comparator.comparing(Author::getName);
     Iterator<Author> authorIterator;
     Iterator<Book> bookIterator;
 
@@ -16,68 +15,62 @@ public class Library {
         return authors;
     }
 
-    public boolean addBook(String title, String author, long ISBNumber, int year) {
-        Book book = new Book(title, author, ISBNumber, year);
-        authorIterator = authors.iterator();
-        while (authorIterator.hasNext()) {
-            Author currentAuthor = authorIterator.next();
-            if (book.getAuthor().equals(currentAuthor.getName())) {
-                bookIterator = currentAuthor.getBooks().iterator();
-                while (bookIterator.hasNext()) {
-                    Book currentBook = bookIterator.next();
-                    if (book.equals(currentBook)) {
-                        return false;
-                    }
-                }
-                currentAuthor.getBooks().add(book);
-                return true;
+    public boolean addBook(String title, String author, long ISBNumber, int year, int pagesNumber) {
+        Book book = new Book(title, author, ISBNumber, year, pagesNumber);
+        Author currentAuthor = new Author(author);
+        int index = Collections.binarySearch(authors, currentAuthor, authorComparator);
+        if (index >= 0) {
+            currentAuthor = authors.get(index);
+            Optional<Book> currentBook = currentAuthor.getBooks()
+                    .stream()
+                    .filter(book::equals)
+                    .findFirst();
+            if (currentBook.isPresent()) {
+                return false;
             }
+            currentAuthor.getBooks().add(book);
+        } else {
+            currentAuthor.getBooks().add(book);
+            authors.add(currentAuthor);
+            authors.sort(authorComparator);
         }
-        Author newAuthor = new Author(book.getAuthor());
-        newAuthor.getBooks().add(book);
-        authors.add(newAuthor);
         return true;
     }
 
     public boolean deleteBook (String title, String author) {
-        authorIterator = authors.iterator();
-        while(authorIterator.hasNext()) {
-            Author currentAuthor = authorIterator.next();
-            if (author.equals(currentAuthor.getName())) {
-                bookIterator = currentAuthor.getBooks().iterator();
-                while (bookIterator.hasNext()) {
-                    Book currentBook = bookIterator.next();
-                    if (title.equals(currentBook.getTitle())) {
-                        bookIterator.remove();
-                        return true;
-                    }
-                }
+        Author currentAuthor = new Author(author);
+        int index = Collections.binarySearch(authors, currentAuthor, authorComparator);
+        if (index >= 0) {
+            currentAuthor = authors.get(index);
+            Optional<Book> currentBook = currentAuthor.getBooks()
+                    .stream()
+                    .filter(x -> title.equals(x.getTitle()))
+                    .findFirst();
+            if (currentBook.isPresent()) {
+                currentAuthor.getBooks().remove(currentBook.get());
+                return true;
             }
         }
         return false;
     }
 
     public boolean addAuthor(String name) {
-        authorIterator = authors.iterator();
-        while (authorIterator.hasNext()) {
-            Author currentAuthor = authorIterator.next();
-            if (name.equals(currentAuthor.getName())) {
-                return false;
-            }
+        Author newAuthor = new Author(name);
+        int index = Collections.binarySearch(authors, newAuthor, authorComparator);
+        if (index < 0) {
+            authors.add(newAuthor);
+            authors.sort(authorComparator);
+            return true;
         }
-        Author author = new Author(name);
-        authors.add(author);
-        return true;
+        return false;
     }
 
     public boolean deleteAuthor(String name) {
-        authorIterator = authors.iterator();
-        while (authorIterator.hasNext()) {
-            Author currentAuthor = authorIterator.next();
-            if (name.equals(currentAuthor.getName())) {
-                authorIterator.remove();
-                return true;
-            }
+        int index = Collections.binarySearch(authors, new Author(name),authorComparator);
+        if (index >= 0) {
+            authors.remove(index);
+            authors.sort(authorComparator);
+            return true;
         }
         return false;
     }
