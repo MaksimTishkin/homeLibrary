@@ -1,13 +1,22 @@
 package com.epam.tishkin.library;
 
 public class Bookmark {
-    private final int page;
+    private boolean isMark;
+    private int page;
 
-    public Bookmark(int page) {
-        this.page = page;
+    public boolean getMark() {
+        return isMark;
+    }
+
+    public void setMark(boolean status) {
+        isMark = status;
     }
 
     public int getPage() {
         return page;
+    }
+
+    public void setPage(int page) {
+        this.page = page;
     }
 }

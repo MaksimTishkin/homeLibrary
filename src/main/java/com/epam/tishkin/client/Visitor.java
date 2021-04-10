@@ -1,5 +1,7 @@
 package com.epam.tishkin.client;
 
+import com.epam.tishkin.authorization.exception.AuthorDoesNotExistException;
+import com.epam.tishkin.authorization.exception.BookDoesNotExistException;
 import com.epam.tishkin.library.Author;
 import com.epam.tishkin.library.Book;
 import com.epam.tishkin.library.Library;
@@ -9,7 +11,6 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.Collections;
 import java.util.Comparator;
 
 public abstract class Visitor {
@@ -38,6 +39,7 @@ public abstract class Visitor {
         long ISBNumber;
         int year;
         int pagesNumber;
+        Book currentBook;
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(System.in))) {
             while(true) {
                 System.out.println("1 Add a new book");
@@ -46,7 +48,11 @@ public abstract class Visitor {
                 System.out.println("4 Delete author");
                 System.out.println("5 Add books from CSV catalog");
                 System.out.println("6 Add books from JSON catalog");
-                System.out.println("10 Exit");
+                System.out.println("7 Find a book by title");
+                System.out.println("8 Add a bookmark to a book");
+                System.out.println("9 Delete a bookmark from a book");
+                System.out.println("10 Find books by author");
+                System.out.println("15 Exit");
                 request = reader.readLine();
                 switch (request) {
                     case "1":
@@ -75,7 +81,8 @@ public abstract class Visitor {
                             System.out.println("Incorrect number of pages" + "\n");
                             break;
                         }
-                        if (library.addBook(bookTitle, bookAuthor, ISBNumber, year, pagesNumber)) {
+                        currentBook = new Book(bookTitle, bookAuthor, ISBNumber, year, pagesNumber);
+                        if (library.addBook(currentBook)) {
                             System.out.println("Book has been added" + "\n");
                         } else {
                             System.out.println("Such a book already exists" + "\n");
@@ -118,9 +125,54 @@ public abstract class Visitor {
                     case "6":
                         System.out.println("Specify the path to the folder");
                         String JSONfileName = reader.readLine();
-                        library.addBooksFromJSON(JSONfileName);
+                        System.out.println("Books added successfully: " + library.addBooksFromJSON(JSONfileName) + "\n");
+                        break;
+                    case "7":
+                        System.out.println("Enter part of the book title");
+                        bookTitle = reader.readLine();
+                        try {
+                            currentBook = library.searchBookForTitle(bookTitle);
+                            System.out.println("Book found: " + currentBook + "\n");
+                        } catch (BookDoesNotExistException e) {
+                            System.out.println(e.getMessage() + "\n");
+                        }
+                        break;
+                    case "8":
+                        System.out.println("Enter part of the book title");
+                        bookTitle = reader.readLine();
+                        System.out.println("Enter the page number");
+                        try {
+                            pagesNumber = Integer.parseInt(reader.readLine());
+                        } catch (NumberFormatException e) {
+                            System.out.println("Incorrect number of page" + "\n");
+                            break;
+                        }
+                        try {
+                            library.addBookmark(bookTitle, pagesNumber);
+                        } catch (BookDoesNotExistException e) {
+                            System.out.println("e.getMessage()" + "\n");
+                        }
+                        break;
+                    case "9":
+                        System.out.println("Enter part of the book title");
+                        bookTitle = reader.readLine();
+                        try {
+                            library.deleteBookmark(bookTitle);
+                        } catch (BookDoesNotExistException e) {
+                            System.out.println("e.getMessage()" + "\n");
+                        }
                         break;
                     case "10":
+                        System.out.println("Enter part of the author's name");
+                        bookAuthor = reader.readLine();
+                        try {
+                            Author author = library.searchBooksForAuthor(bookAuthor);
+                            author.getBooks().forEach(System.out::println);
+                        } catch (AuthorDoesNotExistException e) {
+                            System.out.println(e.getMessage() + "\n");
+                        }
+                        break;
+                    case "15":
                         return;
                 }
             }

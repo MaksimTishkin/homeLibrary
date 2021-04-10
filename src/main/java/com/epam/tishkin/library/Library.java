@@ -1,13 +1,12 @@
 package com.epam.tishkin.library;
 
-import com.epam.tishkin.authorization.AccountsList;
+import com.epam.tishkin.authorization.exception.AuthorDoesNotExistException;
+import com.epam.tishkin.authorization.exception.BookDoesNotExistException;
 import com.google.gson.Gson;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.*;
 
 public class Library {
@@ -23,9 +22,8 @@ public class Library {
         return authors;
     }
 
-    public boolean addBook(String title, String author, long ISBNumber, int year, int pagesNumber) {
-        Book book = new Book(title, author, ISBNumber, year, pagesNumber);
-        Author currentAuthor = new Author(author);
+    public boolean addBook(Book book) {
+        Author currentAuthor = new Author(book.getAuthor());
         int index = Collections.binarySearch(authors, currentAuthor, authorComparator);
         if (index >= 0) {
             currentAuthor = authors.get(index);
@@ -92,12 +90,10 @@ public class Library {
                 long ISBNumber = Long.parseLong(bookParameters[2]);
                 int year = Integer.parseInt(bookParameters[3]);
                 int pagesNumber = Integer.parseInt(bookParameters[4]);
-                if (addBook(bookParameters[0], bookParameters[1], ISBNumber, year, pagesNumber)) {
+                Book book = new Book(bookParameters[0], bookParameters[1], ISBNumber, year, pagesNumber);
+                if (addBook(book)) {
                     count++;
                 }
-            }
-            if (count > 0) {
-                authors.sort(authorComparator);
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -105,12 +101,49 @@ public class Library {
         return count;
     }
 
-    public void addBooksFromJSON(String fileName) {
+    public long addBooksFromJSON(String fileName) {
+        long count = 0;
         try (FileReader reader = new FileReader(fileName)) {
             Gson gson = new Gson();
             Author catalog = gson.fromJson(reader, Author.class);
+            count = catalog.getBooks()
+                    .stream()
+                    .filter(this::addBook)
+                    .count();
         } catch (IOException e) {
             e.printStackTrace();
         }
+        return count;
+    }
+
+    public Book searchBookForTitle(String title) throws BookDoesNotExistException {
+        for (Author author : authors) {
+            Optional<Book> foundBook = author.getBooks()
+                    .stream()
+                    .filter(b -> b.getTitle().contains(title))
+                    .findFirst();
+            if (foundBook.isPresent()) {
+                return foundBook.get();
+            }
+        }
+        throw new BookDoesNotExistException("Book not found");
+    }
+
+    public void addBookmark(String title, int page) throws BookDoesNotExistException {
+        Book book = searchBookForTitle(title);
+        book.getBookmark().setMark(true);
+        book.getBookmark().setPage(page);
+    }
+
+    public void deleteBookmark(String title) throws BookDoesNotExistException {
+        Book book = searchBookForTitle(title);
+        book.getBookmark().setMark(false);
+    }
+
+    public Author searchBooksForAuthor(String author) throws AuthorDoesNotExistException {
+        Optional<Author> booksGivenAuthor = authors.stream()
+                .filter(x -> x.getName().contains(author))
+                .findFirst();
+        return booksGivenAuthor.orElseThrow(() -> new AuthorDoesNotExistException("Author not found"));
     }
 }

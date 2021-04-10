@@ -16,12 +16,11 @@ public class Book {
         this.ISBNumber = ISBNumber;
         this.year = year;
         this.pagesNumber = pagesNumber;
+        bookmark = new Bookmark();
     }
 
-    public void setBookmark(int page) {
-        if (page > 0 && page < pagesNumber) {
-            bookmark = new Bookmark(page);
-        }
+    public Bookmark getBookmark() {
+        return bookmark;
     }
 
     public String getTitle() {
