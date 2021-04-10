@@ -1,15 +1,17 @@
 package com.epam.tishkin.library;
 
-public class Book {
-    private String title;
-    private String author;
-    private long ISBNNumber;
-    private int year;
+import java.util.Objects;
 
-    public Book(String title, String author, long ISBNNumber, int year) {
+public class Book {
+    private final String title;
+    private final String author;
+    private final long ISBNumber;
+    private final int year;
+
+    public Book(String title, String author, long ISBNumber, int year) {
         this.title = title;
         this.author = author;
-        this.ISBNNumber = ISBNNumber;
+        this.ISBNumber = ISBNumber;
         this.year = year;
     }
 
@@ -21,8 +23,8 @@ public class Book {
         return author;
     }
 
-    public  long getISBNNumber() {
-        return ISBNNumber;
+    public long getISBNumber() {
+        return ISBNumber;
     }
 
     public int getYear() {
@@ -30,7 +32,20 @@ public class Book {
     }
 
     @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Book book = (Book) o;
+        return ISBNumber == book.ISBNumber;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(ISBNumber);
+    }
+
+    @Override
     public String toString() {
-        return title + " " + ISBNNumber + " " + year;
+        return title + " " + ISBNumber + " " + year;
     }
 }
