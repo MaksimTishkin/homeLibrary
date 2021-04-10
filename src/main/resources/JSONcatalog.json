@@ -1,0 +1,27 @@
+{
+  "books": [
+        {
+          "title": "Black man",
+          "author": "Esenin",
+          "ISBNumber": 1458963258887,
+          "year": 1923,
+          "pagesNumber": 158
+        },
+        {
+          "title": "A letter to a woman",
+          "author": "Esenin",
+          "ISBNumber": 1478541231111,
+          "year": 1924,
+          "pagesNumber": 215
+        },
+        {
+          "title": "Borodino",
+          "author": "Lermontov",
+          "ISBNumber": 1336985478569,
+          "year": 1937,
+          "pagesNumber": 86
+        }
+  ]
+}
+
+

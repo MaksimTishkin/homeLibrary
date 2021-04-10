@@ -7,13 +7,15 @@
           "title": "Ruslan and Lyudmila",
           "author": "Pushkin",
           "ISBNumber": 1458963258796,
-          "year": 1820
+          "year": 1820,
+          "pagesNumber": 325
         },
         {
           "title": "Сaptain's daughter",
           "author": "Pushkin",
           "ISBNumber": 1478541230025,
-          "year": 1841
+          "year": 1841,
+          "pagesNumber": 128
         }
     ]
     },
@@ -24,13 +26,15 @@
           "title": "Borodino",
           "author": "Lermontov",
           "ISBNumber": 1336985478569,
-          "year": 1937
+          "year": 1937,
+          "pagesNumber": 86
         },
         {
           "title": "Mtsyri",
           "author": "Lermontov",
           "ISBNumber": 5478966652325,
-          "year": 1838
+          "year": 1838,
+          "pagesNumber": 218
         }
       ]
     }

@@ -44,6 +44,8 @@ public abstract class Visitor {
                 System.out.println("2 Delete book");
                 System.out.println("3 Add a new author");
                 System.out.println("4 Delete author");
+                System.out.println("5 Add books from CSV catalog");
+                System.out.println("6 Add books from JSON catalog");
                 System.out.println("10 Exit");
                 request = reader.readLine();
                 switch (request) {
@@ -107,6 +109,16 @@ public abstract class Visitor {
                         } else {
                             System.out.println("There is no such author" + "\n");
                         }
+                        break;
+                    case "5":
+                        System.out.println("Specify the path to the folder");
+                        String CSVfileName = reader.readLine();
+                        System.out.println("Books added successfully: " + library.addBooksFromCSV(CSVfileName) + "\n");
+                        break;
+                    case "6":
+                        System.out.println("Specify the path to the folder");
+                        String JSONfileName = reader.readLine();
+                        library.addBooksFromJSON(JSONfileName);
                         break;
                     case "10":
                         return;

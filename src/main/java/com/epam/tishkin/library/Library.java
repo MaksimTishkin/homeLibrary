@@ -1,5 +1,13 @@
 package com.epam.tishkin.library;
 
+import com.epam.tishkin.authorization.AccountsList;
+import com.google.gson.Gson;
+
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 
 public class Library {
@@ -73,5 +81,36 @@ public class Library {
             return true;
         }
         return false;
+    }
+
+    public int addBooksFromCSV(String fileName) {
+        int count = 0;
+        try (BufferedReader reader = new BufferedReader(new FileReader(fileName))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] bookParameters = line.split(";");
+                long ISBNumber = Long.parseLong(bookParameters[2]);
+                int year = Integer.parseInt(bookParameters[3]);
+                int pagesNumber = Integer.parseInt(bookParameters[4]);
+                if (addBook(bookParameters[0], bookParameters[1], ISBNumber, year, pagesNumber)) {
+                    count++;
+                }
+            }
+            if (count > 0) {
+                authors.sort(authorComparator);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return count;
+    }
+
+    public void addBooksFromJSON(String fileName) {
+        try (FileReader reader = new FileReader(fileName)) {
+            Gson gson = new Gson();
+            Author catalog = gson.fromJson(reader, Author.class);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
