@@ -8,13 +8,10 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class Library {
     private List<Author> authors;
     Comparator<Author> authorComparator = Comparator.comparing(Author::getName);
-    Iterator<Author> authorIterator;
-    Iterator<Book> bookIterator;
 
     public List<Author> getAuthors() {
         if (authors == null) {

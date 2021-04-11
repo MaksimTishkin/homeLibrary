@@ -4,8 +4,6 @@ import com.epam.tishkin.authorization.handler.Handler;
 import com.epam.tishkin.authorization.handler.LoginHandler;
 import com.epam.tishkin.authorization.exception.InvalidAutorizationException;
 import com.epam.tishkin.client.Visitor;
-import com.epam.tishkin.library.Author;
-import com.epam.tishkin.library.Book;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -24,13 +22,7 @@ public class Solution {
             System.out.println("Enter your password");
             password = consoleReader.readLine();
             authorization(login, password);
-            for (Author x : visitor.getLibrary().getAuthors()) {
-                System.out.println(x);
-            }
             visitor.startLibraryUse();
-            for (Author x : visitor.getLibrary().getAuthors()) {
-                System.out.println(x);
-            }
         } catch (IOException e) {
             e.printStackTrace();
         }

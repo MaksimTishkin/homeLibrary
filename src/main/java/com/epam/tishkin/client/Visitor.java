@@ -7,15 +7,12 @@ import com.epam.tishkin.library.Book;
 import com.epam.tishkin.library.Library;
 import com.google.gson.Gson;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.util.Comparator;
 import java.util.List;
 
 public abstract class Visitor {
-    private String name;
+    private final String name;
     private Library library;
 
     Visitor(String name) {
@@ -57,6 +54,7 @@ public abstract class Visitor {
                 System.out.println("12 Find books by year range");
                 System.out.println("13 Find a book by year, number of pages, and title");
                 System.out.println("14 Find books with my bookmark");
+                System.out.println("0 Settings (for administrators only)");
                 System.out.println("15 Exit");
                 request = reader.readLine();
                 switch (request) {
@@ -89,6 +87,7 @@ public abstract class Visitor {
                         currentBook = new Book(bookTitle, bookAuthor, ISBNumber, year, pagesNumber);
                         if (library.addBook(currentBook)) {
                             System.out.println("Book has been added" + "\n");
+                            writeToHistory(this.name + ": new book added " + currentBook);
                         } else {
                             System.out.println("Such a book already exists" + "\n");
                         }
@@ -100,6 +99,7 @@ public abstract class Visitor {
                         bookAuthor = reader.readLine();
                         if (library.deleteBook(bookTitle, bookAuthor)) {
                             System.out.println("The book was deleted" + "\n");
+                            writeToHistory(this.name + ": book deleted " + bookTitle);
                         } else {
                             System.out.println("There is no such book in the library" + "\n");
                         }
@@ -109,6 +109,7 @@ public abstract class Visitor {
                         bookAuthor = reader.readLine();
                         if (library.addAuthor(bookAuthor)) {
                             System.out.println("The author was added" + "\n");
+                            writeToHistory(this.name + ": new author added " + bookAuthor);
                         } else {
                             System.out.println("Such an author already exists" + "\n");
                         }
@@ -118,6 +119,7 @@ public abstract class Visitor {
                         bookAuthor = reader.readLine();
                         if (library.deleteAuthor(bookAuthor)) {
                             System.out.println("The author was deleted" + "\n");
+                            writeToHistory(this.name + ": author deleted " + bookAuthor);
                         } else {
                             System.out.println("There is no such author" + "\n");
                         }
@@ -126,11 +128,13 @@ public abstract class Visitor {
                         System.out.println("Specify the path to the folder");
                         String CSVfileName = reader.readLine();
                         System.out.println("Books added successfully: " + library.addBooksFromCSV(CSVfileName) + "\n");
+                        writeToHistory(this.name + ": added books from the catalog");
                         break;
                     case "6":
                         System.out.println("Specify the path to the folder");
                         String JSONfileName = reader.readLine();
                         System.out.println("Books added successfully: " + library.addBooksFromJSON(JSONfileName) + "\n");
+                        writeToHistory(this.name + ": added books from the catalog");
                         break;
                     case "7":
                         System.out.println("Enter part of the book title");
@@ -138,6 +142,7 @@ public abstract class Visitor {
                         try {
                             currentBook = library.searchBookForTitle(bookTitle);
                             System.out.println("Book found: " + currentBook + "\n");
+                            writeToHistory(this.name + ": book found " + currentBook);
                         } catch (BookDoesNotExistException e) {
                             System.out.println(e.getMessage() + "\n");
                         }
@@ -149,6 +154,7 @@ public abstract class Visitor {
                         try {
                             pagesNumber = Integer.parseInt(reader.readLine());
                             library.addBookmark(bookTitle, pagesNumber);
+                            writeToHistory(this.name + ": bookmark added on page " + pagesNumber);
                         } catch (NumberFormatException e) {
                             System.out.println("Incorrect number of page" + "\n");
                         } catch (BookDoesNotExistException e) {
@@ -160,6 +166,7 @@ public abstract class Visitor {
                         bookTitle = reader.readLine();
                         try {
                             library.deleteBookmark(bookTitle);
+                            writeToHistory(this.name + ": bookmark deleted");
                         } catch (BookDoesNotExistException e) {
                             System.out.println("e.getMessage()" + "\n");
                         }
@@ -170,6 +177,7 @@ public abstract class Visitor {
                         try {
                             Author author = library.searchBooksForAuthor(bookAuthor);
                             author.getBooks().forEach(System.out::println);
+                            writeToHistory(this.name + ": find books by author " + author);
                         } catch (AuthorDoesNotExistException e) {
                             System.out.println(e.getMessage() + "\n");
                         }
@@ -178,15 +186,16 @@ public abstract class Visitor {
                         System.out.println("Enter book's ISBN number");
                         String number = reader.readLine();
                         if (number.length() != 13) {
-                            System.out.println("Incorrect number");
+                            System.out.println("Incorrect number" + "\n");
                             break;
                         }
                         try {
                             ISBNumber = Long.parseLong(number);
                             currentBook= library.searchBookForISBN(ISBNumber);
                             System.out.println("Book found: " + currentBook + "\n");
+                            writeToHistory(this.name + ": find book by ISBN");
                         } catch (NumberFormatException e) {
-                            System.out.println("Incorrect number");
+                            System.out.println("Incorrect number" + "\n");
                         } catch (BookDoesNotExistException e) {
                             System.out.println(e.getMessage());
                         }
@@ -201,6 +210,7 @@ public abstract class Visitor {
                             int finalYear = Integer.parseInt(secondValue);
                             List<Book> foundBooks = library.searchBooksByYearRange(initialYear, finalYear);
                             foundBooks.forEach(System.out::println);
+                            writeToHistory(this.name + ": find books by year range " + initialYear + "-" + finalYear);
                         } catch (NumberFormatException e) {
                             System.out.println("Invalid year specified" + "\n");
                         }
@@ -215,6 +225,7 @@ public abstract class Visitor {
                             bookTitle = reader.readLine();
                             currentBook = library.searchBookByYearPagesNumberAndTitle(year, pagesNumber, bookTitle);
                             System.out.println("Book found: " + currentBook + "\n");
+                            writeToHistory(this.name + ": find book " + currentBook);
                         } catch (NumberFormatException e) {
                             System.out.println("Incorrect input data" + "\n");
                         } catch (BookDoesNotExistException e) {
@@ -224,6 +235,36 @@ public abstract class Visitor {
                     case "14":
                         List<Book> books = library.searchBooksWithBookmark();
                         books.forEach(System.out::println);
+                        writeToHistory(this.name + ": find books with bookmark");
+                        break;
+                    case "0":
+                        if (this.getClass() == Administrator.class) {
+                            Administrator administrator = (Administrator) this;
+                            String login;
+                            System.out.println("1 Add a new user");
+                            System.out.println("2 Block user");
+                            System.out.println("3 Show history");
+                            request = reader.readLine();
+                            switch (request) {
+                                case "1":
+                                    System.out.println("Enter login");
+                                    login = reader.readLine();
+                                    System.out.println("Enter password");
+                                    String password = reader.readLine();
+                                    administrator.addNewUser(login, password);
+                                    break;
+                                case "2":
+                                    System.out.println("Enter login");
+                                    login = reader.readLine();
+                                    administrator.blockUser(login);
+                                    break;
+                                case "3":
+                                    administrator.showHistory();
+                                    break;
+                            }
+                        } else {
+                            System.out.println("You are not an administrator" + "\n");
+                        }
                         break;
                     case "15":
                         return;
@@ -235,7 +276,11 @@ public abstract class Visitor {
         }
     }
 
-    public Library getLibrary() {
-        return library;
+    private static void writeToHistory(String message) {
+        try (FileWriter writer = new FileWriter("src/main/resources/history.txt", true)) {
+            writer.write(message + "\n");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

@@ -1,9 +1,15 @@
 package com.epam.tishkin.authorization;
 
 public class Account {
-    private String login;
-    private String password;
-    private boolean isAdmin;
+    private final String login;
+    private final String password;
+    private final boolean isAdmin;
+
+    public Account(String login, String password) {
+        this.login = login;
+        this.password = password;
+        isAdmin = false;
+    }
 
     public String getLogin() {
         return login;
