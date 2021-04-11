@@ -8,6 +8,7 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class Library {
     private List<Author> authors;
@@ -145,5 +146,57 @@ public class Library {
                 .filter(x -> x.getName().contains(author))
                 .findFirst();
         return booksGivenAuthor.orElseThrow(() -> new AuthorDoesNotExistException("Author not found"));
+    }
+
+    public Book searchBookForISBN(long ISBNumber) throws BookDoesNotExistException {
+        for (Author author : authors) {
+            Optional<Book> foundBook = author.getBooks()
+                    .stream()
+                    .filter(b -> ISBNumber == b.getISBNumber())
+                    .findFirst();
+            if (foundBook.isPresent()) {
+                return foundBook.get();
+            }
+        }
+        throw new BookDoesNotExistException("Book not found");
+    }
+
+    public List<Book> searchBooksByYearRange(int startYear, int finishYear) {
+        List<Book> books = new ArrayList<>();
+        authors.forEach(author -> {
+            for (Book currentBook : author.getBooks()) {
+                if (currentBook.getYear() >= startYear && currentBook.getYear() <= finishYear) {
+                    books.add(currentBook);
+                }
+            }
+        });
+        return books;
+    }
+
+    public Book searchBookByYearPagesNumberAndTitle(int year, int pages, String title) throws BookDoesNotExistException {
+        for (Author author : authors) {
+            Optional<Book> book = author.getBooks()
+                    .stream()
+                    .filter(b -> b.getYear() == year)
+                    .filter((b -> b.getPagesNumber() == pages))
+                    .filter(b -> b.getTitle().contains(title))
+                    .findFirst();
+            if (book.isPresent()) {
+                return book.get();
+            }
+        }
+        throw new BookDoesNotExistException("Book not found");
+    }
+
+    public List<Book> searchBooksWithBookmark() {
+        List<Book> books = new ArrayList<>();
+        authors.forEach(author -> {
+            for (Book currentBook : author.getBooks()) {
+                if (currentBook.getBookmark().getMark()) {
+                    books.add(currentBook);
+                }
+            }
+        });
+        return books;
     }
 }

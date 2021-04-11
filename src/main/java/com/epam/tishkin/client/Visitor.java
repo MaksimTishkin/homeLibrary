@@ -12,6 +12,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Comparator;
+import java.util.List;
 
 public abstract class Visitor {
     private String name;
@@ -52,6 +53,10 @@ public abstract class Visitor {
                 System.out.println("8 Add a bookmark to a book");
                 System.out.println("9 Delete a bookmark from a book");
                 System.out.println("10 Find books by author");
+                System.out.println("11 Find book by ISBN number");
+                System.out.println("12 Find books by year range");
+                System.out.println("13 Find a book by year, number of pages, and title");
+                System.out.println("14 Find books with my bookmark");
                 System.out.println("15 Exit");
                 request = reader.readLine();
                 switch (request) {
@@ -143,14 +148,11 @@ public abstract class Visitor {
                         System.out.println("Enter the page number");
                         try {
                             pagesNumber = Integer.parseInt(reader.readLine());
+                            library.addBookmark(bookTitle, pagesNumber);
                         } catch (NumberFormatException e) {
                             System.out.println("Incorrect number of page" + "\n");
-                            break;
-                        }
-                        try {
-                            library.addBookmark(bookTitle, pagesNumber);
                         } catch (BookDoesNotExistException e) {
-                            System.out.println("e.getMessage()" + "\n");
+                            System.out.println(e.getMessage() + "\n");
                         }
                         break;
                     case "9":
@@ -171,6 +173,57 @@ public abstract class Visitor {
                         } catch (AuthorDoesNotExistException e) {
                             System.out.println(e.getMessage() + "\n");
                         }
+                        break;
+                    case "11":
+                        System.out.println("Enter book's ISBN number");
+                        String number = reader.readLine();
+                        if (number.length() != 13) {
+                            System.out.println("Incorrect number");
+                            break;
+                        }
+                        try {
+                            ISBNumber = Long.parseLong(number);
+                            currentBook= library.searchBookForISBN(ISBNumber);
+                            System.out.println("Book found: " + currentBook + "\n");
+                        } catch (NumberFormatException e) {
+                            System.out.println("Incorrect number");
+                        } catch (BookDoesNotExistException e) {
+                            System.out.println(e.getMessage());
+                        }
+                        break;
+                    case "12":
+                        System.out.println("Enter the initial year value");
+                        String firstValue = reader.readLine();
+                        System.out.println("Enter the final year value");
+                        String secondValue = reader.readLine();
+                        try {
+                            int initialYear = Integer.parseInt(firstValue);
+                            int finalYear = Integer.parseInt(secondValue);
+                            List<Book> foundBooks = library.searchBooksByYearRange(initialYear, finalYear);
+                            foundBooks.forEach(System.out::println);
+                        } catch (NumberFormatException e) {
+                            System.out.println("Invalid year specified" + "\n");
+                        }
+                        break;
+                    case "13":
+                        try {
+                            System.out.println("Enter the year value");
+                            year = Integer.parseInt(reader.readLine());
+                            System.out.println("Enter the pages number");
+                            pagesNumber= Integer.parseInt(reader.readLine());
+                            System.out.println("Enter part of the book title");
+                            bookTitle = reader.readLine();
+                            currentBook = library.searchBookByYearPagesNumberAndTitle(year, pagesNumber, bookTitle);
+                            System.out.println("Book found: " + currentBook + "\n");
+                        } catch (NumberFormatException e) {
+                            System.out.println("Incorrect input data" + "\n");
+                        } catch (BookDoesNotExistException e) {
+                            System.out.println(e.getMessage());
+                        }
+                        break;
+                    case "14":
+                        List<Book> books = library.searchBooksWithBookmark();
+                        books.forEach(System.out::println);
                         break;
                     case "15":
                         return;

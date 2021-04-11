@@ -19,4 +19,9 @@ public class Bookmark {
     public void setPage(int page) {
         this.page = page;
     }
+
+    @Override
+    public String toString() {
+        return "" + getMark();
+    }
 }

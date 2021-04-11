@@ -20,6 +20,9 @@ public class Book {
     }
 
     public Bookmark getBookmark() {
+        if (bookmark == null) {
+            bookmark = new Bookmark();
+        }
         return bookmark;
     }
 
@@ -58,6 +61,6 @@ public class Book {
 
     @Override
     public String toString() {
-        return title + " " + ISBNumber + " " + year + " " + pagesNumber;
+        return title + " " + ISBNumber + " " + year + " " + pagesNumber + " " + getBookmark();
     }
 }
