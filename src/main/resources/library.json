@@ -1,6 +1,41 @@
 {
   "authors": [
     {
+      "name": "Author test",
+      "books": [
+        {
+          "title": "Test",
+          "author": "Author test",
+          "ISBNumber": 1547852365896,
+          "year": 1987,
+          "pagesNumber": 250,
+          "bookmark": {
+            "isMark": false,
+            "page": 0
+          }
+        }
+      ]
+    },
+    {
+      "name": "Esenin",
+      "books": [
+        {
+          "title": "Black man",
+          "author": "Esenin",
+          "ISBNumber": 1458963258887,
+          "year": 1923,
+          "pagesNumber": 158
+        },
+        {
+          "title": "A letter to a woman",
+          "author": "Esenin",
+          "ISBNumber": 1478541231111,
+          "year": 1924,
+          "pagesNumber": 215
+        }
+      ]
+    },
+    {
       "name": "Lermontov",
       "books": [
         {
@@ -37,6 +72,10 @@
           "pagesNumber": 128
         }
       ]
+    },
+    {
+      "name": "This a author only",
+      "books": []
     }
   ]
 }

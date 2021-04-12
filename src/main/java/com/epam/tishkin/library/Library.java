@@ -13,7 +13,6 @@ import java.util.*;
 
 public class Library {
     private List<Author> authors;
-    Comparator<Author> authorComparator = Comparator.comparing(Author::getName);
     final static Logger logger = LogManager.getLogger(Library.class);
 
     public List<Author> getAuthors() {
@@ -39,14 +38,14 @@ public class Library {
         } else {
             currentAuthor.getBooks().add(book);
             authors.add(currentAuthor);
-            authors.sort(authorComparator);
+            authors.sort(Comparator.comparing(Author::getName));
         }
         return true;
     }
 
     public boolean deleteBook (String title, String author) {
         Author currentAuthor = new Author(author);
-        int index = Collections.binarySearch(authors, currentAuthor, authorComparator);
+        int index = Collections.binarySearch(authors, currentAuthor, Comparator.comparing(Author::getName));
         if (index >= 0) {
             currentAuthor = authors.get(index);
             Optional<Book> currentBook = currentAuthor.getBooks()
@@ -63,20 +62,19 @@ public class Library {
 
     public boolean addAuthor(String name) {
         Author newAuthor = new Author(name);
-        int index = Collections.binarySearch(authors, newAuthor, authorComparator);
+        int index = Collections.binarySearch(authors, newAuthor, Comparator.comparing(Author::getName));
         if (index < 0) {
             authors.add(newAuthor);
-            authors.sort(authorComparator);
+            authors.sort(Comparator.comparing(Author::getName));
             return true;
         }
         return false;
     }
 
     public boolean deleteAuthor(String name) {
-        int index = Collections.binarySearch(authors, new Author(name),authorComparator);
+        int index = Collections.binarySearch(authors, new Author(name), Comparator.comparing(Author::getName));
         if (index >= 0) {
             authors.remove(index);
-            authors.sort(authorComparator);
             return true;
         }
         return false;
@@ -142,10 +140,11 @@ public class Library {
     }
 
     public Author searchBooksForAuthor(String author) throws AuthorDoesNotExistException {
-        Optional<Author> booksGivenAuthor = authors.stream()
-                .filter(x -> x.getName().contains(author))
+        Optional <Author> foundAuthor = authors
+                .stream()
+                .filter(a -> a.getName().contains(author))
                 .findFirst();
-        return booksGivenAuthor.orElseThrow(() -> new AuthorDoesNotExistException("Author not found"));
+        return foundAuthor.orElseThrow(() -> new AuthorDoesNotExistException("Author not found"));
     }
 
     public Book searchBookForISBN(long ISBNumber) throws BookDoesNotExistException {
