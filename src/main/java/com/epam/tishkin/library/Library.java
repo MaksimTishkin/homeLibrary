@@ -3,6 +3,8 @@ package com.epam.tishkin.library;
 import com.epam.tishkin.authorization.exception.AuthorDoesNotExistException;
 import com.epam.tishkin.authorization.exception.BookDoesNotExistException;
 import com.google.gson.Gson;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -12,6 +14,7 @@ import java.util.*;
 public class Library {
     private List<Author> authors;
     Comparator<Author> authorComparator = Comparator.comparing(Author::getName);
+    final static Logger logger = LogManager.getLogger(Library.class);
 
     public List<Author> getAuthors() {
         if (authors == null) {
@@ -22,7 +25,7 @@ public class Library {
 
     public boolean addBook(Book book) {
         Author currentAuthor = new Author(book.getAuthor());
-        int index = Collections.binarySearch(authors, currentAuthor, authorComparator);
+        int index = Collections.binarySearch(authors, currentAuthor, Comparator.comparing(Author::getName));
         if (index >= 0) {
             currentAuthor = authors.get(index);
             Optional<Book> currentBook = currentAuthor.getBooks()
@@ -94,7 +97,7 @@ public class Library {
                 }
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error(e.getMessage());
         }
         return count;
     }
@@ -109,7 +112,7 @@ public class Library {
                     .filter(this::addBook)
                     .count();
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error(e.getMessage());
         }
         return count;
     }

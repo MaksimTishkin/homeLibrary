@@ -6,27 +6,39 @@ import com.epam.tishkin.library.Author;
 import com.epam.tishkin.library.Book;
 import com.epam.tishkin.library.Library;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.*;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Properties;
 
 public abstract class Visitor {
+    private static final Properties properties = new Properties();
+    final static Logger logger = LogManager.getLogger(Visitor.class);
+    Comparator<Author> authorComparator = Comparator.comparing(Author::getName);
     private final String name;
     private Library library;
 
     Visitor(String name) {
         this.name = name;
         getLibraryFromJSON();
-        library.getAuthors().sort(Comparator.comparing(Author::getName));
+        library.getAuthors().sort(authorComparator);
     }
 
     private void getLibraryFromJSON() {
-        try (FileReader reader = new FileReader("src/main/resources/library.json")) {
+        try (FileReader readerForProperties = new FileReader("src/main/resources/config.properties")) {
+            properties.load(readerForProperties);
+        } catch (IOException e) {
+            logger.error(e.getMessage());
+        }
+        try (FileReader reader = new FileReader(properties.getProperty("pathFromLibrary"))) {
             Gson gson = new Gson();
             library = gson.fromJson(reader, Library.class);
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error(e.getMessage());
         }
     }
 
@@ -168,7 +180,7 @@ public abstract class Visitor {
                             library.deleteBookmark(bookTitle);
                             writeToHistory(this.name + ": bookmark deleted");
                         } catch (BookDoesNotExistException e) {
-                            System.out.println("e.getMessage()" + "\n");
+                            System.out.println(e.getMessage() + "\n");
                         }
                         break;
                     case "10":
@@ -197,7 +209,7 @@ public abstract class Visitor {
                         } catch (NumberFormatException e) {
                             System.out.println("Incorrect number" + "\n");
                         } catch (BookDoesNotExistException e) {
-                            System.out.println(e.getMessage());
+                            System.out.println(e.getMessage() + "\n");
                         }
                         break;
                     case "12":
@@ -229,7 +241,7 @@ public abstract class Visitor {
                         } catch (NumberFormatException e) {
                             System.out.println("Incorrect input data" + "\n");
                         } catch (BookDoesNotExistException e) {
-                            System.out.println(e.getMessage());
+                            System.out.println(e.getMessage() + "\n");
                         }
                         break;
                     case "14":
@@ -267,20 +279,35 @@ public abstract class Visitor {
                         }
                         break;
                     case "15":
+                        writeLibraryToJSON();
                         return;
                 }
             }
         }
         catch (IOException e) {
-            e.printStackTrace();
+            logger.error(e.getMessage());
+        }
+    }
+
+    private void writeLibraryToJSON() {
+        try (FileWriter writer = new FileWriter(properties.getProperty("pathFromLibrary"))) {
+            Gson gson = new GsonBuilder().setPrettyPrinting().create();
+            writer.write(gson.toJson(library));
+        } catch (IOException e) {
+            logger.error(e.getMessage());
         }
     }
 
     private static void writeToHistory(String message) {
-        try (FileWriter writer = new FileWriter("src/main/resources/history.txt", true)) {
+        try (FileReader readerForProperties = new FileReader("src/main/resources/config.properties")) {
+            properties.load(readerForProperties);
+        } catch (IOException e) {
+            logger.error(e.getMessage());
+        }
+        try (FileWriter writer = new FileWriter(properties.getProperty("pathFromHistory"), true)) {
             writer.write(message + "\n");
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error(e.getMessage());
         }
     }
 }

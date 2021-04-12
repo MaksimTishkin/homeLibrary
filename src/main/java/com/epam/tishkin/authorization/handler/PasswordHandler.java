@@ -10,8 +10,7 @@ public class PasswordHandler extends Handler {
         if (password.equals(account.getPassword())) {
             next = new AdminHandler();
             return next.check();
-        } else {
-            throw new InvalidAutorizationException();
         }
+        throw new InvalidAutorizationException("Invalid login/password");
     }
 }

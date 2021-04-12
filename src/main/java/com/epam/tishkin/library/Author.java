@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Author {
-    private String name;
-    private List<Book> books;
+    private final String name;
+    private final List<Book> books;
 
     public Author(String name) {
         this.name = name;
@@ -22,6 +22,6 @@ public class Author {
 
     @Override
     public String toString() {
-        return name + " " + books;
+        return name;
     }
 }

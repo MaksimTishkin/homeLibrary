@@ -61,6 +61,6 @@ public class Book {
 
     @Override
     public String toString() {
-        return title + " " + ISBNumber + " " + year + " " + pagesNumber + " " + getBookmark();
+        return title + " " + ISBNumber + " " + year + " " + pagesNumber;
     }
 }

@@ -1,25 +1,6 @@
 {
   "authors": [
     {
-      "name": "Pushkin",
-      "books": [
-        {
-          "title": "Ruslan and Lyudmila",
-          "author": "Pushkin",
-          "ISBNumber": 1458963258796,
-          "year": 1820,
-          "pagesNumber": 325
-        },
-        {
-          "title": "Сaptain's daughter",
-          "author": "Pushkin",
-          "ISBNumber": 1478541230025,
-          "year": 1841,
-          "pagesNumber": 128
-        }
-    ]
-    },
-    {
       "name": "Lermontov",
       "books": [
         {
@@ -35,6 +16,25 @@
           "ISBNumber": 5478966652325,
           "year": 1838,
           "pagesNumber": 218
+        }
+      ]
+    },
+    {
+      "name": "Pushkin",
+      "books": [
+        {
+          "title": "Ruslan and Lyudmila",
+          "author": "Pushkin",
+          "ISBNumber": 1458963258796,
+          "year": 1820,
+          "pagesNumber": 325
+        },
+        {
+          "title": "Сaptain\u0027s daughter",
+          "author": "Pushkin",
+          "ISBNumber": 1478541230025,
+          "year": 1841,
+          "pagesNumber": 128
         }
       ]
     }
