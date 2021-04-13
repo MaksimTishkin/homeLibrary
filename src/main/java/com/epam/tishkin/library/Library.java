@@ -3,11 +3,13 @@ package com.epam.tishkin.library;
 import com.epam.tishkin.authorization.exception.AuthorDoesNotExistException;
 import com.epam.tishkin.authorization.exception.BookDoesNotExistException;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.*;
 
@@ -125,7 +127,7 @@ public class Library {
                 return foundBook.get();
             }
         }
-        throw new BookDoesNotExistException("Book not found");
+        throw new BookDoesNotExistException("Book not found for path of title: " + title);
     }
 
     public Book addBookmark(String title, int page) throws BookDoesNotExistException {
@@ -146,7 +148,8 @@ public class Library {
                 .stream()
                 .filter(a -> a.getName().contains(author))
                 .findFirst();
-        return foundAuthor.orElseThrow(() -> new AuthorDoesNotExistException("Author not found"));
+        return foundAuthor.orElseThrow(() ->
+                new AuthorDoesNotExistException("Author not found for path of the author's name: "+ author));
     }
 
     public Book searchBookForISBN(long ISBNumber) throws BookDoesNotExistException {
@@ -159,7 +162,7 @@ public class Library {
                 return foundBook.get();
             }
         }
-        throw new BookDoesNotExistException("Book not found");
+        throw new BookDoesNotExistException("Book not found with ISBN number: " + ISBNumber);
     }
 
     public List<Book> searchBooksByYearRange(int startYear, int finishYear) {

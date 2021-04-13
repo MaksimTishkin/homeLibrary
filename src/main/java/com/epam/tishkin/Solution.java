@@ -25,7 +25,6 @@ public class Solution {
             System.out.println("Enter your password");
             password = consoleReader.readLine();
             authorization(login, password);
-            visitor.startLibraryUse();
         } catch (InvalidAutorizationException | IOException e) {
             logger.error(e.getMessage());
         }

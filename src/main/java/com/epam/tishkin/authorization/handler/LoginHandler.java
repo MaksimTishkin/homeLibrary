@@ -24,7 +24,7 @@ public class LoginHandler extends Handler {
 
     @Override
     public Visitor check() throws InvalidAutorizationException {
-        AccountsList accountsList = parseFromJSONFile();
+        AccountsList accountsList = parseJSONFile();
         Optional<Account> currentCustomer = accountsList.getAccounts()
                 .stream()
                 .filter(account -> login.equals(account.getLogin()))
@@ -34,7 +34,7 @@ public class LoginHandler extends Handler {
         return next.check();
     }
 
-    private AccountsList parseFromJSONFile() {
+    private AccountsList parseJSONFile() {
         AccountsList accounts = null;
         try (FileReader readerForProperties = new FileReader("src/main/resources/config.properties")) {
             properties.load(readerForProperties);
