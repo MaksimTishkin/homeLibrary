@@ -165,7 +165,8 @@ public abstract class Visitor {
                         System.out.println("Enter the page number");
                         try {
                             pagesNumber = Integer.parseInt(reader.readLine());
-                            library.addBookmark(bookTitle, pagesNumber);
+                            currentBook = library.addBookmark(bookTitle, pagesNumber);
+                            System.out.println("Bookmark added: " + currentBook + "\n");
                             writeToHistory(this.name + ": bookmark added on page " + pagesNumber);
                         } catch (NumberFormatException e) {
                             System.out.println("Incorrect number of page" + "\n");
@@ -177,7 +178,8 @@ public abstract class Visitor {
                         System.out.println("Enter part of the book title");
                         bookTitle = reader.readLine();
                         try {
-                            library.deleteBookmark(bookTitle);
+                            currentBook = library.deleteBookmark(bookTitle);
+                            System.out.println("Bookmark deleted: " + currentBook + "\n");
                             writeToHistory(this.name + ": bookmark deleted");
                         } catch (BookDoesNotExistException e) {
                             System.out.println(e.getMessage() + "\n");

@@ -32,9 +32,8 @@ public class Solution {
     }
 
     private static void authorization(String login, String password) throws InvalidAutorizationException {
-            Handler authorization = new LoginHandler(login, password);
-            visitor = authorization.check();
-            System.out.println("Hi");
-
+            Handler handler = new LoginHandler(login, password);
+            visitor = handler.check();
+            System.out.println("Hi, " + login);
     }
 }

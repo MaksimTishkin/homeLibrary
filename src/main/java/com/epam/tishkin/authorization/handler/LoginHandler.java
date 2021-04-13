@@ -35,7 +35,7 @@ public class LoginHandler extends Handler {
     }
 
     private AccountsList parseFromJSONFile() {
-        AccountsList accountsList = null;
+        AccountsList accounts = null;
         try (FileReader readerForProperties = new FileReader("src/main/resources/config.properties")) {
             properties.load(readerForProperties);
         } catch (IOException e) {
@@ -43,10 +43,10 @@ public class LoginHandler extends Handler {
         }
         try (FileReader reader = new FileReader(properties.getProperty("pathFromAccounts"))) {
             Gson gson = new Gson();
-            accountsList = gson.fromJson(reader, AccountsList.class);
+            accounts = gson.fromJson(reader, AccountsList.class);
         } catch (IOException e) {
             logger.error(e.getMessage());
         }
-        return accountsList;
+        return accounts;
     }
 }

@@ -128,15 +128,17 @@ public class Library {
         throw new BookDoesNotExistException("Book not found");
     }
 
-    public void addBookmark(String title, int page) throws BookDoesNotExistException {
+    public Book addBookmark(String title, int page) throws BookDoesNotExistException {
         Book book = searchBookForTitle(title);
         book.getBookmark().setMark(true);
         book.getBookmark().setPage(page);
+        return book;
     }
 
-    public void deleteBookmark(String title) throws BookDoesNotExistException {
+    public Book deleteBookmark(String title) throws BookDoesNotExistException {
         Book book = searchBookForTitle(title);
         book.getBookmark().setMark(false);
+        return book;
     }
 
     public Author searchBooksForAuthor(String author) throws AuthorDoesNotExistException {

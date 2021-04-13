@@ -3,7 +3,7 @@ package com.epam.tishkin.authorization;
 public class Account {
     private final String login;
     private final String password;
-    private final boolean isAdmin;
+    private boolean isAdmin;
 
     public Account(String login, String password) {
         this.login = login;
@@ -21,5 +21,9 @@ public class Account {
 
     public boolean getIsAdmin() {
         return isAdmin;
+    }
+
+    public void setAdmin(boolean status) {
+        isAdmin = status;
     }
 }
