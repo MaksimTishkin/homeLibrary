@@ -1,22 +1,6 @@
 {
   "authors": [
     {
-      "name": "Author test",
-      "books": [
-        {
-          "title": "Test",
-          "author": "Author test",
-          "ISBNumber": 1547852365896,
-          "year": 1987,
-          "pagesNumber": 250,
-          "bookmark": {
-            "isMark": false,
-            "page": 0
-          }
-        }
-      ]
-    },
-    {
       "name": "Esenin",
       "books": [
         {
@@ -72,10 +56,6 @@
           "pagesNumber": 128
         }
       ]
-    },
-    {
-      "name": "This a author only",
-      "books": []
     }
   ]
 }

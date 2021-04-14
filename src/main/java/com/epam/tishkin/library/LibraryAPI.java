@@ -43,54 +43,56 @@ public class LibraryAPI {
                 System.out.println("12 Find books by year range");
                 System.out.println("13 Find a book by year, number of pages, and title");
                 System.out.println("14 Find books with my bookmark");
-                System.out.println("0 Settings (for administrators only)");
                 System.out.println("15 Exit");
+                if (visitor instanceof Administrator) {
+                    System.out.println("16 Settings (for administrators only)");
+                }
                 String request = reader.readLine();
                 switch (request) {
                     case "1":
-                        addNewBook();
+                        addNewBook(reader);
                         break;
                     case "2":
-                        deleteBook();
+                        deleteBook(reader);
                         break;
                     case "3":
-                        addAuthor();
+                        addAuthor(reader);
                         break;
                     case "4":
-                        deleteAuthor();
+                        deleteAuthor(reader);
                         break;
                     case "5":
-                        addBooksFromCSVcatalog();
+                        addBooksFromCSVcatalog(reader);
                         break;
                     case "6":
-                        addBooksFromJSONcatalog();
+                        addBooksFromJSONcatalog(reader);
                         break;
                     case "7":
-                        searchBookForTitle();
+                        searchBookForTitle(reader);
                         break;
                     case "8":
-                        addBookmark();
+                        addBookmark(reader);
                         break;
                     case "9":
-                        deleteBookmark();
+                        deleteBookmark(reader);
                         break;
                     case "10":
-                        searchBooksForAuthor();
+                        searchBooksForAuthor(reader);
                         break;
                     case "11":
-                        searchBookForISBNumber();
+                        searchBookForISBNumber(reader);
                         break;
                     case "12":
-                        searchBooksForYearRange();
+                        searchBooksForYearRange(reader);
                         break;
                     case "13":
-                        searchBookByYearPagesNumberAndTitle();
+                        searchBookByYearPagesNumberAndTitle(reader);
                         break;
                     case "14":
                         showBooksWithBookmarks();
                         break;
-                    case "0":
-                        if (visitor.getClass() == Administrator.class) {
+                    case "16":
+                        if (visitor instanceof Administrator) {
                             Administrator administrator = (Administrator) visitor;
                             String login;
                             System.out.println("1 Add a new user");
@@ -129,182 +131,152 @@ public class LibraryAPI {
         }
     }
 
-    private void addNewBook() {
-        String bookTitle;
-        String bookAuthor;
-        long ISBNumber;
+    private void addNewBook(BufferedReader reader) throws IOException {
         int publicationYear;
+        long ISBNumber;
         int pagesNumber;
         Book currentBook;
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(System.in))) {
-            System.out.println("Enter the book title");
-            bookTitle = reader.readLine();
-            System.out.println("Enter the author of the book");
-            bookAuthor = reader.readLine();
-            System.out.println("Enter the book ISBN number");
-            String individualNumber = reader.readLine();
-            if (individualNumber.length() != 13) {
-                logger.info("Incorrect ISBNumber: " + individualNumber);
-                return;
-            }
-            try {
-                ISBNumber = Long.parseLong(individualNumber);
-            } catch (NumberFormatException e) {
-                logger.info("Incorrect ISBNumber: " + individualNumber);
-                return;
-            }
-            System.out.println("Enter the year of publication");
-            String year = reader.readLine();
-            try {
-                publicationYear = Integer.parseInt(year);
-            } catch (NumberFormatException e) {
-                logger.info("Incorrect year of publication: " + year);
-                return;
-            }
-            System.out.println("Enter the number of pages");
-            String number = reader.readLine();
-            try {
-                pagesNumber = Integer.parseInt(number);
-            } catch (NumberFormatException e) {
-                logger.info("Incorrect year of publication: " + number);
-                return;
-            }
-            currentBook = new Book(bookTitle, bookAuthor, ISBNumber, publicationYear, pagesNumber);
-            if (library.addBook(currentBook)) {
-                logger.info("Book has been added: " + currentBook);
-                writeToHistory(visitor.getName() + ": new book added " + currentBook);
-            } else {
-                logger.info("Such a book already exists: " + currentBook);
-            }
-        } catch (IOException e) {
-            logger.error(e.getMessage());
+        System.out.println("Enter the book title");
+        String bookTitle = reader.readLine();
+        System.out.println("Enter the author of the book");
+        String bookAuthor = reader.readLine();
+        System.out.println("Enter the book ISBN number");
+        String individualNumber = reader.readLine();
+        if (individualNumber.length() != 13) {
+            logger.info("Incorrect ISBNumber: " + individualNumber);
+            return;
+        }
+        try {
+            ISBNumber = Long.parseLong(individualNumber);
+        } catch (NumberFormatException e) {
+            logger.info("Incorrect ISBNumber: " + individualNumber);
+            return;
+        }
+        System.out.println("Enter the year of publication");
+        String year = reader.readLine();
+        try {
+            publicationYear = Integer.parseInt(year);
+        } catch (NumberFormatException e) {
+            logger.info("Incorrect year of publication: " + year);
+            return;
+        }
+        System.out.println("Enter the number of pages");
+        String number = reader.readLine();
+        try {
+            pagesNumber = Integer.parseInt(number);
+        } catch (NumberFormatException e) {
+            logger.info("Incorrect year of publication: " + number);
+            return;
+        }
+        currentBook = new Book(bookTitle, bookAuthor, ISBNumber, publicationYear, pagesNumber);
+        if (library.addBook(currentBook)) {
+            logger.info("Book has been added: " + currentBook);
+            writeToHistory(visitor.getName() + ": new book added " + currentBook);
+        } else {
+            logger.info("Such a book already exists: " + currentBook);
         }
     }
 
-    private void deleteBook() {
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(System.in))) {
-            System.out.println("Enter the book title you want to delete");
-            String bookTitle = reader.readLine();
-            System.out.println("Enter the book author");
-            String bookAuthor = reader.readLine();
-            if (library.deleteBook(bookTitle, bookAuthor)) {
-                logger.info("The book was deleted: " + bookTitle + "author: " + bookAuthor);
-                writeToHistory(visitor.getName() + ": book deleted " + bookTitle + "author: " + bookAuthor);
-            } else {
-                logger.info("There is no such book in the library" + bookTitle + "author: " + bookAuthor);
-            }
-        } catch (IOException e) {
-            logger.error(e.getMessage());
+
+    private void deleteBook(BufferedReader reader) throws IOException {
+        System.out.println("Enter the book title you want to delete");
+        String bookTitle = reader.readLine();
+        System.out.println("Enter the book author");
+        String bookAuthor = reader.readLine();
+        if (library.deleteBook(bookTitle, bookAuthor)) {
+            logger.info("The book was deleted: " + bookTitle + "author: " + bookAuthor);
+            writeToHistory(visitor.getName() + ": book deleted " + bookTitle + "author: " + bookAuthor);
+        } else {
+            logger.info("There is no such book in the library" + bookTitle + "author: " + bookAuthor);
         }
     }
 
-    private void addAuthor() {
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(System.in))) {
-            System.out.println("Enter the author's name");
-            String bookAuthor = reader.readLine();
-            if (library.addAuthor(bookAuthor)) {
-                logger.info("The author was added: " + bookAuthor);
-                writeToHistory(visitor.getName() + ": new author added " + bookAuthor);
-            } else {
-                logger.info("Such an author already exists: " + bookAuthor);
-            }
-        } catch (IOException e) {
-            logger.error(e.getMessage());
+    private void addAuthor(BufferedReader reader) throws IOException {
+        System.out.println("Enter the author's name");
+        String bookAuthor = reader.readLine();
+        if (library.addAuthor(bookAuthor)) {
+            logger.info("The author was added: " + bookAuthor);
+               writeToHistory(visitor.getName() + ": new author added " + bookAuthor);
+        } else {
+            logger.info("Such an author already exists: " + bookAuthor);
         }
     }
 
-    private void deleteAuthor() {
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(System.in))) {
-            System.out.println("Enter the author's name");
-            String bookAuthor = reader.readLine();
-            if (library.deleteAuthor(bookAuthor)) {
-                logger.info("The author was deleted: " + bookAuthor);
-                writeToHistory(visitor.getName() + ": author deleted: " + bookAuthor);
-            } else {
-                logger.info("There is no such author: " + bookAuthor);
-            }
-        } catch (IOException e) {
-            logger.error(e.getMessage());
+    private void deleteAuthor(BufferedReader reader) throws IOException {
+        System.out.println("Enter the author's name");
+        String bookAuthor = reader.readLine();
+        if (library.deleteAuthor(bookAuthor)) {
+            logger.info("The author was deleted: " + bookAuthor);
+            writeToHistory(visitor.getName() + ": author deleted: " + bookAuthor);
+        } else {
+            logger.info("There is no such author: " + bookAuthor);
         }
     }
 
-    private void addBooksFromCSVcatalog() {
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(System.in))) {
-            System.out.println("Enter the path to the folder");
-            String fileName = reader.readLine();
-            int booksAdded = library.addBooksFromCSV(fileName);
-            logger.info("Books added successfully from CSV: " + booksAdded);
-            writeToHistory(visitor.getName() + ": number of books added from CSV catalog: " + booksAdded);
-        } catch (IOException e) {
-            logger.error(e.getMessage());
-        }
+    private void addBooksFromCSVcatalog(BufferedReader reader) throws IOException {
+        System.out.println("Enter the path to the folder");
+        String fileName = reader.readLine();
+        int booksAdded = library.addBooksFromCSV(fileName);
+        logger.info("Books added successfully from CSV: " + booksAdded);
+        writeToHistory(visitor.getName() + ": number of books added from CSV catalog: " + booksAdded);
     }
 
-    private void addBooksFromJSONcatalog() {
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(System.in))) {
-            System.out.println("Enter the path to the folder");
-            String fileName = reader.readLine();
-            long booksAdded = library.addBooksFromJSON(fileName);
-            logger.info("Books added successfully from JSON: " + booksAdded);
-            writeToHistory(visitor.getName() + ": number of books added from JSON catalog: " + booksAdded);
-        } catch (IOException e) {
-            logger.error(e.getMessage());
-        }
+    private void addBooksFromJSONcatalog(BufferedReader reader) throws IOException {
+        System.out.println("Enter the path to the folder");
+        String fileName = reader.readLine();
+        long booksAdded = library.addBooksFromJSON(fileName);
+        logger.info("Books added successfully from JSON: " + booksAdded);
+        writeToHistory(visitor.getName() + ": number of books added from JSON catalog: " + booksAdded);
     }
 
-    private void searchBookForTitle() {
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(System.in))) {
-            System.out.println("Enter part of the book title");
-            String bookTitle = reader.readLine();
+    private void searchBookForTitle(BufferedReader reader) throws IOException {
+        System.out.println("Enter part of the book title");
+        String bookTitle = reader.readLine();
+        try {
             Book currentBook = library.searchBookForTitle(bookTitle);
             logger.info("Book found: " + currentBook.getTitle() + "author: " + currentBook.getAuthor());
             writeToHistory(visitor.getName() + ": book found " + currentBook + "author: " + currentBook.getAuthor());
-        } catch (BookDoesNotExistException | IOException e) {
+        } catch (BookDoesNotExistException e) {
             logger.info(e.getMessage());
         }
     }
 
-    private void searchBooksForAuthor() {
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(System.in))) {
-            System.out.println("Enter part of the author's name");
-            String bookAuthor = reader.readLine();
-            Author author = library.searchBooksForAuthor(bookAuthor);
-            author.getBooks().forEach(System.out::println);
+    private void searchBooksForAuthor(BufferedReader reader) throws IOException {
+        System.out.println("Enter part of the author's name");
+        String bookAuthor = reader.readLine();
+        try { Author author = library.searchBooksForAuthor(bookAuthor);author.getBooks().forEach(System.out::println);
             logger.info("Find books by author: " + author);
             writeToHistory(visitor.getName() + ": find books by author " + author);
-        } catch (AuthorDoesNotExistException | IOException e) {
+        } catch (AuthorDoesNotExistException e) {
             logger.info(e.getMessage());
         }
     }
 
-    private void searchBookForISBNumber() {
-        String number = null;
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(System.in))) {
-            System.out.println("Enter book's ISBN number");
-            number = reader.readLine();
-            if (number.length() != 13) {
-                logger.info("Incorrect ISBN number: " + number);
-                return;
-            }
+    private void searchBookForISBNumber(BufferedReader reader) throws IOException {
+        System.out.println("Enter book's ISBN number");
+        String number = reader.readLine();
+        if (number.length() != 13) {
+            logger.info("Incorrect ISBN number: " + number);
+            return;
+        }
+        try {
             long ISBNumber = Long.parseLong(number);
             Book currentBook = library.searchBookForISBN(ISBNumber);
             logger.info("Book found: " + currentBook.getTitle() + "by ISBN: " + number);
             writeToHistory(visitor.getName() + " Book found: " + currentBook.getTitle() + "by ISBN: " + number);
         } catch (NumberFormatException e) {
-                logger.info("Incorrect ISBN number: " + number);
-        } catch (BookDoesNotExistException | IOException e) {
-                logger.info(e.getMessage());
+            logger.info("Incorrect ISBN number: " + number);
+        } catch (BookDoesNotExistException e) {
+            logger.info(e.getMessage());
         }
     }
 
-    private void searchBooksForYearRange() {
-        String firstValue = null;
-        String secondValue = null;
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(System.in))) {
-            System.out.println("Enter the initial year value");
-            firstValue = reader.readLine();
-            System.out.println("Enter the final year value");
-            secondValue = reader.readLine();
+    private void searchBooksForYearRange(BufferedReader reader) throws IOException {
+        System.out.println("Enter the initial year value");
+        String firstValue = reader.readLine();
+        System.out.println("Enter the final year value");
+        String secondValue = reader.readLine();
+        try {
             int initialYear = Integer.parseInt(firstValue);
             int finalYear = Integer.parseInt(secondValue);
             if (initialYear > finalYear) {
@@ -317,13 +289,11 @@ public class LibraryAPI {
             writeToHistory(visitor.getName() + ": find books by year range " + initialYear + " - " + finalYear);
         } catch (NumberFormatException e) {
             logger.info("Incorrect year specified: initial year " + firstValue + " final year " + secondValue);
-        } catch (IOException e) {
-            logger.error(e.getMessage());
         }
     }
 
-    private void searchBookByYearPagesNumberAndTitle() {
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(System.in))) {
+    private void searchBookByYearPagesNumberAndTitle(BufferedReader reader) throws IOException {
+        try {
             System.out.println("Enter the year value");
             int year = Integer.parseInt(reader.readLine());
             System.out.println("Enter the pages number");
@@ -336,43 +306,36 @@ public class LibraryAPI {
             writeToHistory(visitor.getName() + ": find book " + currentBook);
         } catch (NumberFormatException e) {
             logger.info("Incorrect input data");
-        } catch (BookDoesNotExistException | IOException e) {
+        } catch (BookDoesNotExistException e) {
             logger.info(e.getMessage());
         }
     }
 
-    private void addBookmark() {
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(System.in))) {
-            System.out.println("Enter the book title");
-            String bookTitle = reader.readLine();
-            System.out.println("Enter the page number");
-            int pageNumber = Integer.parseInt(reader.readLine());
-            visitor.addBookmark(bookTitle, pageNumber);
-            logger.info("Bookmark added - book title: " + bookTitle + " page: " + pageNumber);
-        } catch (NumberFormatException e) {
-            logger.info("Incorrect page number format");
-        } catch (IOException e) {
-            logger.error(e.getMessage());
+    private void addBookmark(BufferedReader reader) throws IOException {
+        System.out.println("Enter the book title");
+        String bookTitle = reader.readLine();
+        System.out.println("Enter the page number");
+        int pageNumber = Integer.parseInt(reader.readLine());
+        visitor.addBookmark(bookTitle, pageNumber);
+        logger.info("Bookmark added - book title: " + bookTitle + " page: " + pageNumber);
+        writeToHistory(visitor.getName() + "Bookmark added - book title: " + bookTitle + " page: " + pageNumber);
         }
-    }
 
-    private void deleteBookmark() {
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(System.in))) {
-            System.out.println("Enter the book title");
-            String bookTitle = reader.readLine();
-            if (visitor.deleteBookmark(bookTitle)) {
-                logger.info("Bookmark deleted - book title: " + bookTitle);
-            } else {
-                logger.info("There is no bookmark in this book: " + bookTitle);
-            }
-        } catch (IOException e) {
-            logger.error(e.getMessage());
+    private void deleteBookmark(BufferedReader reader) throws IOException {
+        System.out.println("Enter the book title");
+        String bookTitle = reader.readLine();
+        if (visitor.deleteBookmark(bookTitle)) {
+            logger.info("Bookmark deleted - book title: " + bookTitle);
+            writeToHistory(visitor.getName() + "Bookmark deleted - book title: " + bookTitle);
+        } else {
+            logger.info("There is no bookmark in this book: " + bookTitle);
         }
     }
 
     private void showBooksWithBookmarks() {
         visitor.getMyBookmarks().forEach(System.out::println);
         logger.info("Show books with visitor's bookmark");
+        writeToHistory(visitor.getName() + ": Show books with visitor's bookmark");
     }
 
     private static Library getLibraryFromJSON() {

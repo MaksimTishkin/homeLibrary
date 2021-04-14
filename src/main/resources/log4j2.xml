@@ -13,7 +13,7 @@
 
     <Loggers>
         <Logger name= "com.epam.tishkin" level="info" additivity="true">
-            <AppenderRef ref="Console" level="warn"/>
+            <AppenderRef ref="Console" level="info"/>
         </Logger>
 
         <!-- Root Logger -->
