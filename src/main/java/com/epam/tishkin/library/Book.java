@@ -8,7 +8,6 @@ public class Book {
     private final long ISBNumber;
     private final int year;
     private final int pagesNumber;
-    private Bookmark bookmark;
 
     public Book(String title, String author, long ISBNumber, int year, int pagesNumber) {
         this.title = title;
@@ -16,14 +15,6 @@ public class Book {
         this.ISBNumber = ISBNumber;
         this.year = year;
         this.pagesNumber = pagesNumber;
-        bookmark = new Bookmark();
-    }
-
-    public Bookmark getBookmark() {
-        if (bookmark == null) {
-            bookmark = new Bookmark();
-        }
-        return bookmark;
     }
 
     public String getTitle() {
@@ -61,6 +52,6 @@ public class Book {
 
     @Override
     public String toString() {
-        return title + " " + ISBNumber + " " + year + " " + pagesNumber;
+        return "Title: " + title + " Author: " + author;
     }
 }

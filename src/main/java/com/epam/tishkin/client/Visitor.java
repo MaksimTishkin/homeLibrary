@@ -1,18 +1,39 @@
 package com.epam.tishkin.client;
 
+import com.epam.tishkin.library.Bookmark;
 import com.epam.tishkin.library.LibraryAPI;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 public abstract class Visitor {
     private final String name;
-    private LibraryAPI libraryAPI;
+    private final List<Bookmark> myBookmarks;
 
     Visitor(String name) {
         this.name = name;
-        libraryAPI = new LibraryAPI(this);
-        libraryAPI.startLibraryUse();
+        myBookmarks = new ArrayList<>();
+    }
+
+    public void addBookmark(String title, int page) {
+        Bookmark bookmark = new Bookmark(title, page);
+        myBookmarks.add(bookmark);
+    }
+
+    public boolean deleteBookmark(String title) {
+        Optional<Bookmark> currentBookmark = myBookmarks
+                .stream()
+                .filter(b -> b.getTitle().equals(title))
+                .findFirst();
+        return currentBookmark.isPresent();
     }
 
     public String getName() {
         return name;
+    }
+
+    public List<Bookmark> getMyBookmarks() {
+        return myBookmarks;
     }
 }

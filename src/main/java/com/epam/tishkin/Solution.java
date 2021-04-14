@@ -5,6 +5,7 @@ import com.epam.tishkin.authorization.handler.LoginHandler;
 import com.epam.tishkin.authorization.exception.InvalidAutorizationException;
 import com.epam.tishkin.client.Visitor;
 import com.epam.tishkin.library.Library;
+import com.epam.tishkin.library.LibraryAPI;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -14,7 +15,6 @@ import java.io.InputStreamReader;
 
 public class Solution {
     final static Logger logger = LogManager.getLogger(Solution.class);
-    static Visitor visitor;
 
     public static void main(String[] args) {
         String login;
@@ -24,15 +24,16 @@ public class Solution {
             login = consoleReader.readLine();
             System.out.println("Enter your password");
             password = consoleReader.readLine();
-            authorization(login, password);
+            Visitor visitor = authorization(login, password);
+            LibraryAPI libraryAPI = new LibraryAPI(visitor);
+            libraryAPI.startLibraryUse();
         } catch (InvalidAutorizationException | IOException e) {
             logger.error(e.getMessage());
         }
     }
 
-    private static void authorization(String login, String password) throws InvalidAutorizationException {
+    private static Visitor authorization(String login, String password) throws InvalidAutorizationException {
             Handler handler = new LoginHandler(login, password);
-            visitor = handler.check();
-            System.out.println("Hi, " + login);
+            return handler.check();
     }
 }

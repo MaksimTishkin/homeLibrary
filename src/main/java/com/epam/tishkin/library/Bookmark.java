@@ -1,27 +1,24 @@
 package com.epam.tishkin.library;
 
 public class Bookmark {
-    private boolean isMark;
+    private String title;
     private int page;
 
-    public boolean getMark() {
-        return isMark;
+    public Bookmark(String title, int page) {
+        this.title = title;
+        this.page = page;
     }
 
-    public void setMark(boolean status) {
-        isMark = status;
+    public String getTitle() {
+        return title;
     }
 
     public int getPage() {
         return page;
     }
 
-    public void setPage(int page) {
-        this.page = page;
-    }
-
     @Override
     public String toString() {
-        return "" + getMark();
+        return "Book title: " + title + " page with bookmark: " + page;
     }
 }

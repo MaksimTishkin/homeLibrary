@@ -17,24 +17,16 @@ import java.util.Properties;
 public class LibraryAPI {
     private static final Properties properties = new Properties();
     final static Logger logger = LogManager.getLogger(LibraryAPI.class);
-    Comparator<Author> authorComparator = Comparator.comparing(Author::getName);
     private final Library library;
-    private Visitor visitor;
+    private final Visitor visitor;
 
     public LibraryAPI(Visitor visitor) {
-        visitor = this.visitor;
+        this.visitor = visitor;
         library = getLibraryFromJSON();
-        library.getAuthors().sort(authorComparator);
+        library.getAuthors().sort(Comparator.comparing(Author::getName));
     }
 
     public void startLibraryUse() {
-        String request;
-        String bookTitle;
-        String bookAuthor;
-        long ISBNumber;
-        int year;
-        int pagesNumber;
-        Book currentBook;
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(System.in))) {
             while(true) {
                 System.out.println("1 Add a new book");
@@ -53,7 +45,7 @@ public class LibraryAPI {
                 System.out.println("14 Find books with my bookmark");
                 System.out.println("0 Settings (for administrators only)");
                 System.out.println("15 Exit");
-                request = reader.readLine();
+                String request = reader.readLine();
                 switch (request) {
                     case "1":
                         addNewBook();
@@ -77,30 +69,10 @@ public class LibraryAPI {
                         searchBookForTitle();
                         break;
                     case "8":
-                        System.out.println("Enter part of the book title");
-                        bookTitle = reader.readLine();
-                        System.out.println("Enter the page number");
-                        try {
-                            pagesNumber = Integer.parseInt(reader.readLine());
-                            currentBook = library.addBookmark(bookTitle, pagesNumber);
-                            System.out.println("Bookmark added: " + currentBook + "\n");
-                            writeToHistory(visitor.getName() + ": bookmark added on page " + pagesNumber);
-                        } catch (NumberFormatException e) {
-                            System.out.println("Incorrect number of page" + "\n");
-                        } catch (BookDoesNotExistException e) {
-                            System.out.println(e.getMessage() + "\n");
-                        }
+                        addBookmark();
                         break;
                     case "9":
-                        System.out.println("Enter part of the book title");
-                        bookTitle = reader.readLine();
-                        try {
-                            currentBook = library.deleteBookmark(bookTitle);
-                            System.out.println("Bookmark deleted: " + currentBook + "\n");
-                            writeToHistory(visitor.getName() + ": bookmark deleted");
-                        } catch (BookDoesNotExistException e) {
-                            System.out.println(e.getMessage() + "\n");
-                        }
+                        deleteBookmark();
                         break;
                     case "10":
                         searchBooksForAuthor();
@@ -112,12 +84,10 @@ public class LibraryAPI {
                         searchBooksForYearRange();
                         break;
                     case "13":
-
+                        searchBookByYearPagesNumberAndTitle();
                         break;
                     case "14":
-                        List<Book> books = library.searchBooksWithBookmark();
-                        books.forEach(System.out::println);
-                        writeToHistory(visitor.getName() + ": find books with bookmark");
+                        showBooksWithBookmarks();
                         break;
                     case "0":
                         if (visitor.getClass() == Administrator.class) {
@@ -361,14 +331,48 @@ public class LibraryAPI {
             System.out.println("Enter part of the book title");
             String bookTitle = reader.readLine();
             Book currentBook = library.searchBookByYearPagesNumberAndTitle(year, pagesNumber, bookTitle);
-            logger.info("Book found by year, pages number and title: " + currentBook.getTitle()
-                    "author: " + currentBook.getAuthor());
+            logger.info("Book found by year, pages number and title: " + currentBook
+                    + "year: " + currentBook.getYear() + " pages number: " + currentBook.getPagesNumber());
             writeToHistory(visitor.getName() + ": find book " + currentBook);
         } catch (NumberFormatException e) {
-            System.out.println("Incorrect input data" + "\n");
-        } catch (BookDoesNotExistException e) {
-            System.out.println(e.getMessage() + "\n");
+            logger.info("Incorrect input data");
+        } catch (BookDoesNotExistException | IOException e) {
+            logger.info(e.getMessage());
         }
+    }
+
+    private void addBookmark() {
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(System.in))) {
+            System.out.println("Enter the book title");
+            String bookTitle = reader.readLine();
+            System.out.println("Enter the page number");
+            int pageNumber = Integer.parseInt(reader.readLine());
+            visitor.addBookmark(bookTitle, pageNumber);
+            logger.info("Bookmark added - book title: " + bookTitle + " page: " + pageNumber);
+        } catch (NumberFormatException e) {
+            logger.info("Incorrect page number format");
+        } catch (IOException e) {
+            logger.error(e.getMessage());
+        }
+    }
+
+    private void deleteBookmark() {
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(System.in))) {
+            System.out.println("Enter the book title");
+            String bookTitle = reader.readLine();
+            if (visitor.deleteBookmark(bookTitle)) {
+                logger.info("Bookmark deleted - book title: " + bookTitle);
+            } else {
+                logger.info("There is no bookmark in this book: " + bookTitle);
+            }
+        } catch (IOException e) {
+            logger.error(e.getMessage());
+        }
+    }
+
+    private void showBooksWithBookmarks() {
+        visitor.getMyBookmarks().forEach(System.out::println);
+        logger.info("Show books with visitor's bookmark");
     }
 
     private static Library getLibraryFromJSON() {

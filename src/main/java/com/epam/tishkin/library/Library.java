@@ -3,13 +3,11 @@ package com.epam.tishkin.library;
 import com.epam.tishkin.authorization.exception.AuthorDoesNotExistException;
 import com.epam.tishkin.authorization.exception.BookDoesNotExistException;
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.util.*;
 
@@ -130,19 +128,6 @@ public class Library {
         throw new BookDoesNotExistException("Book not found for path of title: " + title);
     }
 
-    public Book addBookmark(String title, int page) throws BookDoesNotExistException {
-        Book book = searchBookForTitle(title);
-        book.getBookmark().setMark(true);
-        book.getBookmark().setPage(page);
-        return book;
-    }
-
-    public Book deleteBookmark(String title) throws BookDoesNotExistException {
-        Book book = searchBookForTitle(title);
-        book.getBookmark().setMark(false);
-        return book;
-    }
-
     public Author searchBooksForAuthor(String author) throws AuthorDoesNotExistException {
         Optional <Author> foundAuthor = authors
                 .stream()
@@ -189,18 +174,7 @@ public class Library {
                 return book.get();
             }
         }
-        throw new BookDoesNotExistException("Book not found");
-    }
-
-    public List<Book> searchBooksWithBookmark() {
-        List<Book> books = new ArrayList<>();
-        authors.forEach(author -> {
-            for (Book currentBook : author.getBooks()) {
-                if (currentBook.getBookmark().getMark()) {
-                    books.add(currentBook);
-                }
-            }
-        });
-        return books;
+        throw new BookDoesNotExistException("Book not found: " + " year: " + year
+                + " pages: " + pages + " title: " + title);
     }
 }
