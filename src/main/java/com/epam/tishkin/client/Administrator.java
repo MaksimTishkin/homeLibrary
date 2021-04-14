@@ -2,7 +2,6 @@ package com.epam.tishkin.client;
 
 import com.epam.tishkin.authorization.Account;
 import com.epam.tishkin.authorization.AccountsList;
-import com.epam.tishkin.authorization.handler.LoginHandler;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.apache.logging.log4j.LogManager;

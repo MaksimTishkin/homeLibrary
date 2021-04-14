@@ -2,6 +2,8 @@ package com.epam.tishkin;
 
 import com.epam.tishkin.authorization.exception.AuthorDoesNotExistException;
 import com.epam.tishkin.authorization.exception.BookDoesNotExistException;
+import com.epam.tishkin.client.User;
+import com.epam.tishkin.client.Visitor;
 import com.epam.tishkin.library.Author;
 import com.epam.tishkin.library.Book;
 import com.epam.tishkin.library.Library;
@@ -9,13 +11,15 @@ import com.epam.tishkin.library.Library;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-/**
+
 public class LibraryTest {
     private Library library;
+    private Visitor visitor;
 
     @BeforeEach
     public void setUp() {
         library = new Library();
+        visitor = new User("Maxim");
         Author firstAuthor = new Author("Pushkin");
         Author secondAuthor = new Author("Lermontov");
         Book firstBook = new Book("Ruslan and Lyudmila", "Pushkin", 1458963258796L,
@@ -82,14 +86,17 @@ public class LibraryTest {
     }
 
     @Test
-    public void testAddAndDeleteBookmark() throws BookDoesNotExistException {
+    public void testAddAndDeleteBookmark() {
         int page = 15;
-        Book expectedBook = library.addBookmark("Bor", page);
-        Assertions.assertTrue(expectedBook.getBookmark().getMark());
-        Assertions.assertEquals(page, expectedBook.getBookmark().getPage());
-        Assertions.assertThrows(BookDoesNotExistException.class, () -> library.addBookmark("NotExist", page));
-        expectedBook = library.deleteBookmark("Bor");
-        Assertions.assertFalse(expectedBook.getBookmark().getMark());
+        visitor.addBookmark("Borodino", page);
+        int expectedBookmarkCount = 1;
+        Assertions.assertEquals(expectedBookmarkCount, visitor.getMyBookmarks().size());
+        visitor.addBookmark("Ruslan and Lyudmila", page);
+        expectedBookmarkCount = 2;
+        Assertions.assertEquals(expectedBookmarkCount, visitor.getMyBookmarks().size());
+        visitor.deleteBookmark("Ruslan and Lyudmila");
+        expectedBookmarkCount = 1;
+        Assertions.assertEquals(expectedBookmarkCount, visitor.getMyBookmarks().size());
     }
 
     @Test
@@ -100,4 +107,3 @@ public class LibraryTest {
         Assertions.assertThrows(AuthorDoesNotExistException.class, () -> library.searchBooksForAuthor("NotExist"));
     }
 }
-*/

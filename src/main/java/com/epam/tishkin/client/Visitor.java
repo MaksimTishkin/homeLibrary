@@ -1,7 +1,6 @@
 package com.epam.tishkin.client;
 
 import com.epam.tishkin.library.Bookmark;
-import com.epam.tishkin.library.LibraryAPI;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,6 +25,7 @@ public abstract class Visitor {
                 .stream()
                 .filter(b -> b.getTitle().equals(title))
                 .findFirst();
+        currentBookmark.ifPresent(myBookmarks::remove);
         return currentBookmark.isPresent();
     }
 

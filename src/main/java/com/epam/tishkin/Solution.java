@@ -4,7 +4,6 @@ import com.epam.tishkin.authorization.handler.Handler;
 import com.epam.tishkin.authorization.handler.LoginHandler;
 import com.epam.tishkin.authorization.exception.InvalidAutorizationException;
 import com.epam.tishkin.client.Visitor;
-import com.epam.tishkin.library.Library;
 import com.epam.tishkin.library.LibraryAPI;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

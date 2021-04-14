@@ -91,38 +91,14 @@ public class LibraryAPI {
                     case "14":
                         showBooksWithBookmarks();
                         break;
-                    case "16":
-                        if (visitor instanceof Administrator) {
-                            Administrator administrator = (Administrator) visitor;
-                            String login;
-                            System.out.println("1 Add a new user");
-                            System.out.println("2 Block user");
-                            System.out.println("3 Show history");
-                            request = reader.readLine();
-                            switch (request) {
-                                case "1":
-                                    System.out.println("Enter login");
-                                    login = reader.readLine();
-                                    System.out.println("Enter password");
-                                    String password = reader.readLine();
-                                    administrator.addNewUser(login, password);
-                                    break;
-                                case "2":
-                                    System.out.println("Enter login");
-                                    login = reader.readLine();
-                                    administrator.blockUser(login);
-                                    break;
-                                case "3":
-                                    administrator.showHistory();
-                                    break;
-                            }
-                        } else {
-                            System.out.println("You are not an administrator" + "\n");
-                        }
-                        break;
                     case "15":
                         writeLibraryToJSON();
                         return;
+                    case "16":
+                        if (visitor instanceof Administrator) {
+                            useAdditionalAdministratorFeatures(reader);
+                        }
+                        break;
                 }
             }
         }
@@ -234,7 +210,7 @@ public class LibraryAPI {
         String bookTitle = reader.readLine();
         try {
             Book currentBook = library.searchBookForTitle(bookTitle);
-            logger.info("Book found: " + currentBook.getTitle() + "author: " + currentBook.getAuthor());
+            logger.info("Book found: " + currentBook.getTitle() + " author: " + currentBook.getAuthor());
             writeToHistory(visitor.getName() + ": book found " + currentBook + "author: " + currentBook.getAuthor());
         } catch (BookDoesNotExistException e) {
             logger.info(e.getMessage());
@@ -318,7 +294,7 @@ public class LibraryAPI {
         int pageNumber = Integer.parseInt(reader.readLine());
         visitor.addBookmark(bookTitle, pageNumber);
         logger.info("Bookmark added - book title: " + bookTitle + " page: " + pageNumber);
-        writeToHistory(visitor.getName() + "Bookmark added - book title: " + bookTitle + " page: " + pageNumber);
+        writeToHistory(visitor.getName() + " Bookmark added - book title: " + bookTitle + " page: " + pageNumber);
         }
 
     private void deleteBookmark(BufferedReader reader) throws IOException {
@@ -374,5 +350,50 @@ public class LibraryAPI {
         } catch (IOException e) {
             logger.error(e.getMessage());
        }
+    }
+
+    private void useAdditionalAdministratorFeatures(BufferedReader reader) throws IOException {
+        System.out.println("1 Add a new user");
+        System.out.println("2 Block user");
+        System.out.println("3 Show history");
+        System.out.println("4 Go back to the previous menu");
+        String request = reader.readLine();
+        switch (request) {
+            case "1":
+                addNewUser(reader);
+                break;
+            case "2":
+                blockUser(reader);
+                break;
+            case "3":
+                showHistory();
+                break;
+            case "4":
+                break;
+        }
+    }
+
+    private void addNewUser(BufferedReader reader) throws IOException {
+        Administrator administrator = (Administrator) visitor;
+        System.out.println("Enter login");
+        String login = reader.readLine();
+        System.out.println("Enter password");
+        String password = reader.readLine();
+        administrator.addNewUser(login, password);
+        logger.info(administrator.getName() + " added new user - " + login + "with password - " + password);
+    }
+
+    private void blockUser(BufferedReader reader) throws IOException {
+        Administrator administrator = (Administrator) visitor;
+        System.out.println("Enter login");
+        String login = reader.readLine();
+        administrator.blockUser(login);
+        logger.info(administrator.getName() + " Deleted the user - " + login);
+    }
+
+    private void showHistory() {
+        Administrator administrator = (Administrator) visitor;
+        administrator.showHistory();
+        logger.info(administrator.getName() + " the history of actions is shown");
     }
 }

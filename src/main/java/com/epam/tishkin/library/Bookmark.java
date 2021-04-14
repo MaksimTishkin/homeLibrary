@@ -1,8 +1,8 @@
 package com.epam.tishkin.library;
 
 public class Bookmark {
-    private String title;
-    private int page;
+    private final String title;
+    private final int page;
 
     public Bookmark(String title, int page) {
         this.title = title;
