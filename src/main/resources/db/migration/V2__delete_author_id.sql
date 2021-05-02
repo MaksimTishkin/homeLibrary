@@ -1,0 +1,18 @@
+DROP TABLE Book;
+DROP TABLE Author;
+
+CREATE TABLE Author
+(
+Name nvarchar(150) PRIMARY KEY
+);
+
+CREATE TABLE Book
+(
+Id integer PRIMARY KEY AUTO_INCREMENT,
+Title NVARCHAR(300) NOT NULL,
+ISBNumber NVARCHAR(13) NOT NULL UNIQUE,
+Publication_Year INTEGER,
+Pages_Number INTEGER,
+Author_Name nvarchar,
+FOREIGN KEY(Author_Name) REFERENCES Author(Name) ON DELETE CASCADE
+);

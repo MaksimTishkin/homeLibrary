@@ -1,9 +1,13 @@
+
 package com.epam.tishkin.library;
 
-import com.epam.tishkin.authorization.exception.AuthorDoesNotExistException;
-import com.epam.tishkin.authorization.exception.BookDoesNotExistException;
+import com.epam.tishkin.dao.LibraryDAO;
+import com.epam.tishkin.exception.AuthorDoesNotExistException;
+import com.epam.tishkin.exception.BookDoesNotExistException;
 import com.epam.tishkin.client.Administrator;
 import com.epam.tishkin.client.Visitor;
+import com.epam.tishkin.models.Author;
+import com.epam.tishkin.models.Book;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.apache.logging.log4j.LogManager;
@@ -17,13 +21,13 @@ import java.util.Properties;
 public class LibraryAPI {
     private static final Properties properties = new Properties();
     final static Logger logger = LogManager.getLogger(LibraryAPI.class);
-    private final Library library;
+    private final LibraryDAO libraryDAO;
     private final Visitor visitor;
 
     public LibraryAPI(Visitor visitor) {
         this.visitor = visitor;
-        library = getLibraryFromJSON();
-        library.getAuthors().sort(Comparator.comparing(Author::getName));
+        libraryDAO = getLibraryFromJSON();
+        libraryDAO.getAuthors().sort(Comparator.comparing(Author::getName));
     }
 
     public void startLibraryUse() {
@@ -109,7 +113,7 @@ public class LibraryAPI {
 
     private void addNewBook(BufferedReader reader) throws IOException {
         int publicationYear;
-        long ISBNumber;
+        String ISBNumber;
         int pagesNumber;
         Book currentBook;
         System.out.println("Enter the book title");
@@ -117,15 +121,15 @@ public class LibraryAPI {
         System.out.println("Enter the author of the book");
         String bookAuthor = reader.readLine();
         System.out.println("Enter the book ISBN number");
-        String individualNumber = reader.readLine();
-        if (individualNumber.length() != 13) {
-            logger.info("Incorrect ISBNumber: " + individualNumber);
+        ISBNumber = reader.readLine();
+        if (ISBNumber.length() != 13) {
+            logger.info("Incorrect ISBNumber: " + ISBNumber);
             return;
         }
         try {
-            ISBNumber = Long.parseLong(individualNumber);
+            Long.parseLong(ISBNumber);
         } catch (NumberFormatException e) {
-            logger.info("Incorrect ISBNumber: " + individualNumber);
+            logger.info("Incorrect ISBNumber: " + ISBNumber);
             return;
         }
         System.out.println("Enter the year of publication");
@@ -140,92 +144,72 @@ public class LibraryAPI {
         String number = reader.readLine();
         try {
             pagesNumber = Integer.parseInt(number);
+            if (pagesNumber <= 0) {
+                logger.info("Incorrect year of publication: " + number);
+                return;
+            }
         } catch (NumberFormatException e) {
             logger.info("Incorrect year of publication: " + number);
             return;
         }
-        currentBook = new Book(bookTitle, bookAuthor, ISBNumber, publicationYear, pagesNumber);
-        if (library.addBook(currentBook)) {
-            logger.info("Book has been added: " + currentBook);
+        currentBook = new Book(bookTitle, ISBNumber, publicationYear, pagesNumber);
+        if (libraryDAO.addBook(currentBook, bookAuthor)) {
             writeToHistory(visitor.getName() + ": new book added " + currentBook);
-        } else {
-            logger.info("Such a book already exists: " + currentBook);
         }
     }
-
 
     private void deleteBook(BufferedReader reader) throws IOException {
         System.out.println("Enter the book title you want to delete");
         String bookTitle = reader.readLine();
         System.out.println("Enter the book author");
         String bookAuthor = reader.readLine();
-        if (library.deleteBook(bookTitle, bookAuthor)) {
-            logger.info("The book was deleted: " + bookTitle + "author: " + bookAuthor);
+        if (libraryDAO.deleteBook(bookTitle, bookAuthor)) {
             writeToHistory(visitor.getName() + ": book deleted " + bookTitle + "author: " + bookAuthor);
-        } else {
-            logger.info("There is no such book in the library" + bookTitle + "author: " + bookAuthor);
         }
     }
 
     private void addAuthor(BufferedReader reader) throws IOException {
         System.out.println("Enter the author's name");
         String bookAuthor = reader.readLine();
-        if (library.addAuthor(bookAuthor)) {
-            logger.info("The author was added: " + bookAuthor);
-               writeToHistory(visitor.getName() + ": new author added " + bookAuthor);
-        } else {
-            logger.info("Such an author already exists: " + bookAuthor);
+        if (libraryDAO.addAuthor(bookAuthor)) {
+            writeToHistory(visitor.getName() + ": new author added " + bookAuthor);
         }
     }
 
     private void deleteAuthor(BufferedReader reader) throws IOException {
         System.out.println("Enter the author's name");
         String bookAuthor = reader.readLine();
-        if (library.deleteAuthor(bookAuthor)) {
-            logger.info("The author was deleted: " + bookAuthor);
+        if (libraryDAO.deleteAuthor(bookAuthor)) {
             writeToHistory(visitor.getName() + ": author deleted: " + bookAuthor);
-        } else {
-            logger.info("There is no such author: " + bookAuthor);
         }
     }
 
     private void addBooksFromCSVcatalog(BufferedReader reader) throws IOException {
         System.out.println("Enter the path to the folder");
         String fileName = reader.readLine();
-        int booksAdded = library.addBooksFromCSV(fileName);
-        logger.info("Books added successfully from CSV: " + booksAdded);
+        int booksAdded = libraryDAO.addBooksFromCSV(fileName);
         writeToHistory(visitor.getName() + ": number of books added from CSV catalog: " + booksAdded);
     }
 
     private void addBooksFromJSONcatalog(BufferedReader reader) throws IOException {
         System.out.println("Enter the path to the folder");
         String fileName = reader.readLine();
-        long booksAdded = library.addBooksFromJSON(fileName);
-        logger.info("Books added successfully from JSON: " + booksAdded);
+        long booksAdded = libraryDAO.addBooksFromJSON(fileName);
         writeToHistory(visitor.getName() + ": number of books added from JSON catalog: " + booksAdded);
     }
 
     private void searchBookForTitle(BufferedReader reader) throws IOException {
         System.out.println("Enter part of the book title");
         String bookTitle = reader.readLine();
-        try {
-            Book currentBook = library.searchBookForTitle(bookTitle);
-            logger.info("Book found: " + currentBook.getTitle() + " author: " + currentBook.getAuthor());
-            writeToHistory(visitor.getName() + ": book found " + currentBook + "author: " + currentBook.getAuthor());
-        } catch (BookDoesNotExistException e) {
-            logger.info(e.getMessage());
+        libraryDAO.searchBookForTitle(bookTitle);
+        writeToHistory(visitor.getName() + ": search for books by title: " + bookTitle);
         }
-    }
 
     private void searchBooksForAuthor(BufferedReader reader) throws IOException {
         System.out.println("Enter part of the author's name");
         String bookAuthor = reader.readLine();
-        try { Author author = library.searchBooksForAuthor(bookAuthor);author.getBooks().forEach(System.out::println);
-            logger.info("Find books by author: " + author);
-            writeToHistory(visitor.getName() + ": find books by author " + author);
-        } catch (AuthorDoesNotExistException e) {
-            logger.info(e.getMessage());
-        }
+        libraryDAO.searchBooksForAuthor(bookAuthor);
+        writeToHistory(visitor.getName() + ": find books by author: " + bookAuthor);
     }
 
     private void searchBookForISBNumber(BufferedReader reader) throws IOException {
@@ -236,14 +220,13 @@ public class LibraryAPI {
             return;
         }
         try {
-            long ISBNumber = Long.parseLong(number);
-            Book currentBook = library.searchBookForISBN(ISBNumber);
-            logger.info("Book found: " + currentBook.getTitle() + "by ISBN: " + number);
-            writeToHistory(visitor.getName() + " Book found: " + currentBook.getTitle() + "by ISBN: " + number);
+            Long.parseLong(number);
         } catch (NumberFormatException e) {
             logger.info("Incorrect ISBN number: " + number);
-        } catch (BookDoesNotExistException e) {
-            logger.info(e.getMessage());
+            return;
+        }
+        if (libraryDAO.searchBookForISBN(number)) {
+            writeToHistory(visitor.getName() + " Book found by ISBN: " + number);
         }
     }
 
@@ -259,9 +242,7 @@ public class LibraryAPI {
                 logger.info("Incorrect year specified: initial year " + initialYear + " final year " + finalYear);
                 return;
             }
-            List<Book> foundBooks = library.searchBooksByYearRange(initialYear, finalYear);
-            foundBooks.forEach(System.out::println);
-            logger.info("Find books by year range: " + initialYear + " - " + finalYear);
+            libraryDAO.searchBooksByYearRange(initialYear, finalYear);
             writeToHistory(visitor.getName() + ": find books by year range " + initialYear + " - " + finalYear);
         } catch (NumberFormatException e) {
             logger.info("Incorrect year specified: initial year " + firstValue + " final year " + secondValue);
@@ -276,14 +257,10 @@ public class LibraryAPI {
             int pagesNumber= Integer.parseInt(reader.readLine());
             System.out.println("Enter part of the book title");
             String bookTitle = reader.readLine();
-            Book currentBook = library.searchBookByYearPagesNumberAndTitle(year, pagesNumber, bookTitle);
-            logger.info("Book found by year, pages number and title: " + currentBook
-                    + "year: " + currentBook.getYear() + " pages number: " + currentBook.getPagesNumber());
-            writeToHistory(visitor.getName() + ": find book " + currentBook);
+            libraryDAO.searchBookByYearPagesNumberAndTitle(year, pagesNumber, bookTitle);
+            writeToHistory(visitor.getName() + ": find books by year, pages and title ");
         } catch (NumberFormatException e) {
             logger.info("Incorrect input data");
-        } catch (BookDoesNotExistException e) {
-            logger.info(e.getMessage());
         }
     }
 
@@ -314,30 +291,6 @@ public class LibraryAPI {
         writeToHistory(visitor.getName() + ": Show books with visitor's bookmark");
     }
 
-    private static Library getLibraryFromJSON() {
-        Library library = null;
-        try (FileReader readerForProperties = new FileReader("src/main/resources/config.properties")) {
-            properties.load(readerForProperties);
-        } catch (IOException e) {
-            logger.error(e.getMessage());
-        }
-        try (FileReader reader = new FileReader(properties.getProperty("pathFromLibrary"))) {
-            Gson gson = new Gson();
-            library = gson.fromJson(reader, Library.class);
-        } catch (IOException e) {
-            logger.error(e.getMessage());
-        }
-        return library;
-    }
-
-    private void writeLibraryToJSON () {
-        try (FileWriter writer = new FileWriter(properties.getProperty("pathFromLibrary"))) {
-            Gson gson = new GsonBuilder().setPrettyPrinting().create();
-            writer.write(gson.toJson(library));
-        } catch (IOException e) {
-            logger.error(e.getMessage());
-        }
-    }
 
     private static void writeToHistory (String message){
         try (FileReader readerForProperties = new FileReader("src/main/resources/config.properties")) {
@@ -397,3 +350,4 @@ public class LibraryAPI {
         logger.info(administrator.getName() + " the history of actions is shown");
     }
 }
+*/

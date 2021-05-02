@@ -1,6 +1,6 @@
 package com.epam.tishkin.client;
 
-import com.epam.tishkin.library.Bookmark;
+import com.epam.tishkin.models.Bookmark;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -1,6 +1,7 @@
+/**
 package com.epam.tishkin.authorization.handler;
 
-import com.epam.tishkin.authorization.exception.InvalidAutorizationException;
+import com.epam.tishkin.exception.InvalidAutorizationException;
 import com.epam.tishkin.client.Visitor;
 
 public class PasswordHandler extends Handler {
@@ -14,3 +15,4 @@ public class PasswordHandler extends Handler {
         throw new InvalidAutorizationException("Invalid login/password");
     }
 }
+ */

@@ -1,3 +1,4 @@
+/**
 package com.epam.tishkin.authorization.handler;
 
 import com.epam.tishkin.client.Administrator;
@@ -14,3 +15,4 @@ public class AdminHandler extends Handler {
         return new User(account.getLogin());
     }
 }
+ */

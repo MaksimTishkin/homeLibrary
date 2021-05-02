@@ -1,4 +1,4 @@
-package com.epam.tishkin.authorization.exception;
+package com.epam.tishkin.exception;
 
 public class AuthorDoesNotExistException extends Exception {
 
