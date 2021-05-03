@@ -15,7 +15,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
 
-public class LibraryDAO {
+public class LibraryDAO implements AbstractLibraryDAO {
     final static Logger logger = LogManager.getLogger(LibraryDAO.class);
     private final DBConnector connector;
 
@@ -225,7 +225,7 @@ public class LibraryDAO {
         return book;
     }
 
-    public DBConnector getConnector() {
-        return connector;
+    public void closeSessionFactory() {
+        connector.closeSessionFactory();
     }
 }

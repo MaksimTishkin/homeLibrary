@@ -7,11 +7,10 @@ import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 
 public class DBConnector {
-    private Configuration configuration;
-    private SessionFactory sessionFactory;
+    private final SessionFactory sessionFactory;
 
     public DBConnector() {
-        configuration = new Configuration().configure();
+        Configuration configuration = new Configuration().configure();
         configuration.addAnnotatedClass(Author.class);
         configuration.addAnnotatedClass(Book.class);
         sessionFactory = configuration.buildSessionFactory();
