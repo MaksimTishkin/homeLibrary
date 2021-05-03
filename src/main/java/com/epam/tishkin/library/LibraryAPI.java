@@ -1,8 +1,8 @@
 
 package com.epam.tishkin.library;
 
-import com.epam.tishkin.dao.AbstractLibraryDAO;
 import com.epam.tishkin.dao.LibraryDAO;
+import com.epam.tishkin.dao.LibraryDatabaseDAO;
 import com.epam.tishkin.client.Administrator;
 import com.epam.tishkin.client.Visitor;
 import com.epam.tishkin.models.Book;
@@ -16,12 +16,12 @@ import java.util.Properties;
 public class LibraryAPI {
     private static final Properties properties = new Properties();
     final static Logger logger = LogManager.getLogger(LibraryAPI.class);
-    private final AbstractLibraryDAO libraryDAO;
+    private final LibraryDAO libraryDAO;
     private final Visitor visitor;
 
     public LibraryAPI(Visitor visitor) {
         this.visitor = visitor;
-        libraryDAO = new LibraryDAO();
+        libraryDAO = new LibraryDatabaseDAO();
     }
 
     public void startLibraryUse() {
@@ -90,7 +90,7 @@ public class LibraryAPI {
                         showBooksWithBookmarks();
                         break;
                     case "15":
-                        libraryDAO.closeSessionFactory();
+                        libraryDAO.closeConnection();
                         return;
                     case "16":
                         if (visitor instanceof Administrator) {

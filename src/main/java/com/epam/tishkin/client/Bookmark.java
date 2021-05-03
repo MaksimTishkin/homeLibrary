@@ -1,4 +1,4 @@
-package com.epam.tishkin.models;
+package com.epam.tishkin.client;
 
 public class Bookmark {
     private final String title;
