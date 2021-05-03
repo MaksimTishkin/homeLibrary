@@ -14,7 +14,6 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class LibraryDAO {
     final static Logger logger = LogManager.getLogger(LibraryDAO.class);
@@ -211,6 +210,19 @@ public class LibraryDAO {
                 findBooks.forEach(b -> logger.info(b + ": book found"));
             }
         }
+    }
+
+    public Book findBookByFullTitle(String title) {
+        Book book = null;
+        try (Session session = connector.openSession()) {
+            Query<Book> query = session.createQuery("FROM Book where title =:title", Book.class);
+            query.setParameter("title", title);
+            List<Book> foundBook = query.getResultList();
+            if (!foundBook.isEmpty()) {
+                book = foundBook.get(0);
+            }
+        }
+        return book;
     }
 
     public DBConnector getConnector() {

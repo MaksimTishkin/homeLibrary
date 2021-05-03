@@ -9,6 +9,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.*;
+import java.time.Year;
 import java.util.Properties;
 
 public class LibraryAPI {
@@ -128,6 +129,11 @@ public class LibraryAPI {
         String year = reader.readLine();
         try {
             publicationYear = Integer.parseInt(year);
+            int currentYear = Year.now().getValue();
+            if (publicationYear > currentYear) {
+                logger.info("Incorrect year of publication: " + year);
+                return;
+            }
         } catch (NumberFormatException e) {
             logger.info("Incorrect year of publication: " + year);
             return;
@@ -137,11 +143,11 @@ public class LibraryAPI {
         try {
             pagesNumber = Integer.parseInt(number);
             if (pagesNumber <= 0) {
-                logger.info("Incorrect year of publication: " + number);
+                logger.info("Invalid page value: " + number);
                 return;
             }
         } catch (NumberFormatException e) {
-            logger.info("Incorrect year of publication: " + number);
+            logger.info("Invalid page value: " + number);
             return;
         }
         currentBook = new Book(bookTitle, ISBNumber, publicationYear, pagesNumber);
@@ -218,7 +224,7 @@ public class LibraryAPI {
             return;
         }
         if (libraryDAO.searchBookForISBN(number)) {
-            writeToHistory(visitor.getName() + " Book found by ISBN: " + number);
+            writeToHistory(visitor.getName() + ": Book found by ISBN: " + number);
         }
     }
 
@@ -257,21 +263,36 @@ public class LibraryAPI {
     }
 
     private void addBookmark(BufferedReader reader) throws IOException {
+        String page = "";
         System.out.println("Enter the book title");
         String bookTitle = reader.readLine();
-        System.out.println("Enter the page number");
-        int pageNumber = Integer.parseInt(reader.readLine());
-        visitor.addBookmark(bookTitle, pageNumber);
-        logger.info("Bookmark added - book title: " + bookTitle + " page: " + pageNumber);
-        writeToHistory(visitor.getName() + " Bookmark added - book title: " + bookTitle + " page: " + pageNumber);
+        Book book = libraryDAO.findBookByFullTitle(bookTitle);
+        if (book == null) {
+            logger.info(bookTitle + " book not found");
+            return;
         }
+        System.out.println("Enter the page number");
+        try {
+            page = reader.readLine();
+            int pageNumber = Integer.parseInt(page);
+            if (pageNumber <= 0 || pageNumber > book.getPagesNumber()) {
+                logger.info(pageNumber + " Invalid page value");
+                return;
+            }
+            visitor.addBookmark(bookTitle, pageNumber);
+            logger.info("Bookmark added - book title: " + bookTitle + " page: " + pageNumber);
+            writeToHistory(visitor.getName() + ": Bookmark added - book title: " + bookTitle + " page: " + pageNumber);
+        } catch (NumberFormatException e) {
+            logger.info(page + " Invalid page value");
+        }
+    }
 
     private void deleteBookmark(BufferedReader reader) throws IOException {
         System.out.println("Enter the book title");
         String bookTitle = reader.readLine();
         if (visitor.deleteBookmark(bookTitle)) {
             logger.info("Bookmark deleted - book title: " + bookTitle);
-            writeToHistory(visitor.getName() + "Bookmark deleted - book title: " + bookTitle);
+            writeToHistory(visitor.getName() + ": Bookmark deleted - book title: " + bookTitle);
         } else {
             logger.info("There is no bookmark in this book: " + bookTitle);
         }
