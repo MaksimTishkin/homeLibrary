@@ -2,6 +2,7 @@ package com.epam.tishkin.dao;
 
 import com.epam.tishkin.exception.BookDoesNotExistException;
 import com.epam.tishkin.models.Author;
+import com.epam.tishkin.models.AuthorsList;
 import com.epam.tishkin.models.Book;
 import com.google.gson.Gson;
 import org.apache.logging.log4j.LogManager;
@@ -128,8 +129,12 @@ public class LibraryDAO {
         int count = 0;
         try (FileReader reader = new FileReader(fileName)) {
             Gson gson = new Gson();
-            Author catalog = gson.fromJson(reader, Author.class);
-            count = (int) catalog.getBooks().stream().filter(b -> addBook(b, catalog.getName())).count();
+            AuthorsList list = gson.fromJson(reader, AuthorsList.class);
+            for (Author author : list.getAuthors()) {
+                System.out.println(author);
+                author.getBooks().forEach(b -> System.out.println(b.getTitle() + " " + b.getISBNumber() + " "
+                + b.getPublicationYear() + " " + b.getPagesNumber()));
+            }
         } catch (IOException e) {
             logger.error(e.getMessage());
         }
@@ -138,7 +143,7 @@ public class LibraryDAO {
 
     public void searchBookForTitle(String title) {
         try (Session session = connector.openSession()) {
-            Query<Book> query = session.createQuery("FROM Book WHERE Title =: name", Book.class);
+            Query<Book> query = session.createQuery("FROM Book WHERE Title LIKE :name", Book.class);
             query.setParameter("name", "%" + title + "%");
             List<Book> findBooks = query.getResultList();
             if (findBooks.isEmpty()) {
@@ -151,22 +156,24 @@ public class LibraryDAO {
 
     public void searchBooksForAuthor(String authorName) {
         try (Session session = connector.openSession()) {
-            Author author = session.get(Author.class, "%" + authorName + "%");
-            if (author == null || author.getBooks().isEmpty()) {
+            Query<Book> query = session.createQuery("FROM Book WHERE Author_Name LIKE :name", Book.class);
+            query.setParameter("name", "%" + authorName + "%");
+            List<Book> foundBooks = query.getResultList();
+            if (foundBooks.isEmpty()) {
                 logger.info(authorName + ": books by this author were not found");
             } else {
-                author.getBooks().forEach(b -> logger.info(b + ":  book found"));
+                foundBooks.forEach(b -> logger.info(b + ":  book found"));
             }
         }
     }
 
     public boolean searchBookForISBN(String ISBNumber) {
         try (Session session = connector.openSession()) {
-            Query<Book> query = session.createQuery("FROM Book WHERE ISBNumber =: number", Book.class);
+            Query<Book> query = session.createQuery("FROM Book WHERE ISBNumber =:number", Book.class);
             query.setParameter("number", ISBNumber);
-            Book currentBook = query.getSingleResult();
-            if (currentBook != null) {
-                logger.info(ISBNumber + ": book found " + currentBook);
+            List<Book> foundBook = query.getResultList();
+            if (!foundBook.isEmpty()) {
+                logger.info(ISBNumber + ": book found " + foundBook.get(0));
                 return true;
             }
             logger.info(ISBNumber + ": the book with this number was not found");
@@ -203,5 +210,9 @@ public class LibraryDAO {
                 findBooks.forEach(b -> logger.info(b + ": book found"));
             }
         }
+    }
+
+    public DBConnector getConnector() {
+        return connector;
     }
 }

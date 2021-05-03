@@ -1,4 +1,3 @@
-/**
 package com.epam.tishkin.authorization.handler;
 
 import com.epam.tishkin.authorization.AccountsList;
@@ -51,4 +50,4 @@ public class LoginHandler extends Handler {
         return accounts;
     }
 }
- */
+

@@ -1,4 +1,3 @@
-/**
 package com.epam.tishkin.authorization.handler;
 
 import com.epam.tishkin.authorization.Account;
@@ -13,4 +12,4 @@ public abstract class Handler {
 
     public abstract Visitor check() throws InvalidAutorizationException;
 }
- */
+

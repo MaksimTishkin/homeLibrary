@@ -2,20 +2,13 @@
 package com.epam.tishkin.library;
 
 import com.epam.tishkin.dao.LibraryDAO;
-import com.epam.tishkin.exception.AuthorDoesNotExistException;
-import com.epam.tishkin.exception.BookDoesNotExistException;
 import com.epam.tishkin.client.Administrator;
 import com.epam.tishkin.client.Visitor;
-import com.epam.tishkin.models.Author;
 import com.epam.tishkin.models.Book;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.*;
-import java.util.Comparator;
-import java.util.List;
 import java.util.Properties;
 
 public class LibraryAPI {
@@ -26,8 +19,7 @@ public class LibraryAPI {
 
     public LibraryAPI(Visitor visitor) {
         this.visitor = visitor;
-        libraryDAO = getLibraryFromJSON();
-        libraryDAO.getAuthors().sort(Comparator.comparing(Author::getName));
+        libraryDAO = new LibraryDAO();
     }
 
     public void startLibraryUse() {
@@ -96,7 +88,7 @@ public class LibraryAPI {
                         showBooksWithBookmarks();
                         break;
                     case "15":
-                        writeLibraryToJSON();
+                        libraryDAO.getConnector().closeSessionFactory();
                         return;
                     case "16":
                         if (visitor instanceof Administrator) {
@@ -350,4 +342,3 @@ public class LibraryAPI {
         logger.info(administrator.getName() + " the history of actions is shown");
     }
 }
-*/
