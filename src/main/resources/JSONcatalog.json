@@ -5,13 +5,13 @@
       "books": [
         {
           "title": "Black man",
-          "ISBNumber": "1458963258887",
+          "ISBNumber": "1458963258889",
           "publicationYear": 1923,
           "pagesNumber": 158
         },
         {
           "title": "A letter to a woman",
-          "ISBNumber": 1478541231111,
+          "ISBNumber": "1478541231115",
           "publicationYear": 0,
           "pagesNumber": 215
         }
@@ -22,8 +22,8 @@
       "books": [
         {
           "title": "Borodino",
-          "ISBNumber": 1336985478569,
-          "publicationYear": 0,
+          "ISBNumber": "1336985478569",
+          "publicationYear": 1856,
           "pagesNumber": 86
         }
       ]

@@ -278,8 +278,12 @@ public class LibraryAPI {
     }
 
     private void showBooksWithBookmarks() {
-        visitor.getMyBookmarks().forEach(System.out::println);
-        logger.info("Show books with visitor's bookmark");
+        if (visitor.getMyBookmarks().isEmpty()) {
+            logger.info("No books with bookmarks");
+        } else {
+            visitor.getMyBookmarks().forEach(b -> logger.info("Book with bookmark - " + b.getTitle()
+            + " on page " + b.getPage()));
+        }
         writeToHistory(visitor.getName() + ": Show books with visitor's bookmark");
     }
 

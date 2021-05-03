@@ -1,6 +1,5 @@
 package com.epam.tishkin.dao;
 
-import com.epam.tishkin.exception.BookDoesNotExistException;
 import com.epam.tishkin.models.Author;
 import com.epam.tishkin.models.AuthorsList;
 import com.epam.tishkin.models.Book;
@@ -15,6 +14,7 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class LibraryDAO {
     final static Logger logger = LogManager.getLogger(LibraryDAO.class);
@@ -131,9 +131,11 @@ public class LibraryDAO {
             Gson gson = new Gson();
             AuthorsList list = gson.fromJson(reader, AuthorsList.class);
             for (Author author : list.getAuthors()) {
-                System.out.println(author);
-                author.getBooks().forEach(b -> System.out.println(b.getTitle() + " " + b.getISBNumber() + " "
-                + b.getPublicationYear() + " " + b.getPagesNumber()));
+                for (Book currentBook : author.getBooks()) {
+                    if (addBook(currentBook, author.getName())) {
+                        count++;
+                    }
+                }
             }
         } catch (IOException e) {
             logger.error(e.getMessage());
@@ -183,23 +185,22 @@ public class LibraryDAO {
 
     public void searchBooksByYearRange(int startYear, int finishYear) {
         try (Session session = connector.openSession()) {
-            Query<Book> query = session.createQuery("FROM Book WHERE publicationYear >= startYear " +
-                    "and <= finishYear", Book.class);
+            Query<Book> query = session.createQuery("FROM Book WHERE publicationYear BETWEEN :startYear and :finishYear", Book.class);
             query.setParameter("startYear", startYear);
             query.setParameter("finishYear", finishYear);
-            List<Book> findBooks = query.getResultList();
-            if (findBooks.isEmpty()) {
+            List<Book> foundBooks = query.getResultList();
+            if (foundBooks.isEmpty()) {
                 logger.info(startYear + " " + finishYear + ": books not found");
             } else {
-                findBooks.forEach(b -> logger.info(startYear + " " + finishYear + ": " + b));
+                foundBooks.forEach(b -> logger.info(startYear + " " + finishYear + ": " + b));
             }
         }
     }
 
     public void searchBookByYearPagesNumberAndTitle(int year, int pages, String title) {
         try (Session session = connector.openSession()) {
-            Query<Book> query = session.createQuery("FROM Book WHERE publicationYear =: year " +
-                    "and pagesNumber =: pages and title =: title", Book.class);
+            Query<Book> query = session.createQuery("FROM Book WHERE publicationYear =:year " +
+                    "and pagesNumber =:pages and title LIKE :title", Book.class);
             query.setParameter("year", year);
             query.setParameter("pages", pages);
             query.setParameter("title", "%" + title + "%");

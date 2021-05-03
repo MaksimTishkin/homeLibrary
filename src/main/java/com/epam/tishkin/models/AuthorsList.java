@@ -1,7 +1,5 @@
 package com.epam.tishkin.models;
 
-import com.epam.tishkin.authorization.Account;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,6 +10,6 @@ public class AuthorsList {
         if (authors == null) {
             authors = new ArrayList<>();
         }
-        return this.authors;
+        return authors;
     }
 }
