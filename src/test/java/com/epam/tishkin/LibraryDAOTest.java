@@ -4,7 +4,7 @@ package com.epam.tishkin;
 import com.epam.tishkin.dao.LibraryDAO;
 import com.epam.tishkin.exception.AuthorDoesNotExistException;
 import com.epam.tishkin.exception.BookDoesNotExistException;
-import com.epam.tishkin.client.User;
+import com.epam.tishkin.models.User;
 import com.epam.tishkin.client.Visitor;
 import com.epam.tishkin.models.Author;
 import com.epam.tishkin.models.Book;

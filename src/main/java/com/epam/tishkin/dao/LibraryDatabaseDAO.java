@@ -19,12 +19,8 @@ public class LibraryDatabaseDAO implements LibraryDAO {
     final static Logger logger = LogManager.getLogger(LibraryDatabaseDAO.class);
     private final DBConnector connector;
 
-    public LibraryDatabaseDAO() {
-        connector = new DBConnector();
-    }
-
-    public LibraryDAO getLibraryDAO() {
-        return new LibraryDatabaseDAO();
+    public LibraryDatabaseDAO(DBConnector connector) {
+        this.connector = connector;
     }
 
     public boolean addBook(Book book, String authorName) {

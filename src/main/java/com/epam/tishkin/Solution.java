@@ -3,8 +3,11 @@ package com.epam.tishkin;
 import com.epam.tishkin.authorization.handler.Handler;
 import com.epam.tishkin.authorization.handler.LoginHandler;
 import com.epam.tishkin.client.Visitor;
+import com.epam.tishkin.dao.UserDAO;
+import com.epam.tishkin.dao.UserDatabaseDAO;
 import com.epam.tishkin.exception.InvalidAutorizationException;
 import com.epam.tishkin.library.LibraryAPI;
+import com.epam.tishkin.models.User;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -23,17 +26,14 @@ public class Solution {
             login = consoleReader.readLine();
             System.out.println("Enter your password");
             password = consoleReader.readLine();
-            Visitor visitor = authorization(login, password);
-            LibraryAPI libraryAPI = new LibraryAPI(visitor);
+
+            UserDAO userDAO = new UserDatabaseDAO();
+            User user = userDAO.getUser(login, password);
+            LibraryAPI libraryAPI = new LibraryAPI(user);
             libraryAPI.startLibraryUse();
         } catch (InvalidAutorizationException | IOException e) {
             logger.error(e.getMessage());
         }
-    }
-
-    private static Visitor authorization(String login, String password) throws InvalidAutorizationException {
-        Handler handler = new LoginHandler(login, password);
-        return handler.check();
     }
 }
 

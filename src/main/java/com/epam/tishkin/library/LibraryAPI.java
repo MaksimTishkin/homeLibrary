@@ -1,10 +1,12 @@
 package com.epam.tishkin.library;
 
+import com.epam.tishkin.dao.DBConnector;
 import com.epam.tishkin.dao.LibraryDAO;
 import com.epam.tishkin.dao.LibraryDatabaseDAO;
 import com.epam.tishkin.client.Administrator;
 import com.epam.tishkin.client.Visitor;
 import com.epam.tishkin.models.Book;
+import com.epam.tishkin.models.User;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -16,12 +18,11 @@ public class LibraryAPI {
     private static final Properties properties = new Properties();
     final static Logger logger = LogManager.getLogger(LibraryAPI.class);
     private final LibraryDAO libraryDAO;
-    private final Visitor visitor;
+    private final User user;
 
-    public LibraryAPI(Visitor visitor) {
-        this.visitor = visitor;
-        libraryDAO = new LibraryDatabaseDAO();
-
+    public LibraryAPI(User user, DBConnector connector) {
+        this.user = user;
+        libraryDAO = new LibraryDatabaseDAO(connector);
     }
 
     public void startLibraryUse() {
