@@ -1,4 +1,3 @@
-
 package com.epam.tishkin.library;
 
 import com.epam.tishkin.dao.LibraryDAO;
@@ -22,6 +21,7 @@ public class LibraryAPI {
     public LibraryAPI(Visitor visitor) {
         this.visitor = visitor;
         libraryDAO = new LibraryDatabaseDAO();
+
     }
 
     public void startLibraryUse() {

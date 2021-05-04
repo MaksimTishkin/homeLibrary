@@ -23,6 +23,10 @@ public class LibraryDatabaseDAO implements LibraryDAO {
         connector = new DBConnector();
     }
 
+    public LibraryDAO getLibraryDAO() {
+        return new LibraryDatabaseDAO();
+    }
+
     public boolean addBook(Book book, String authorName) {
         try (Session session = connector.openSession()) {
             Transaction transaction = session.beginTransaction();

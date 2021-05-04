@@ -3,7 +3,6 @@ package com.epam.tishkin.dao;
 import com.epam.tishkin.models.Book;
 
 public interface LibraryDAO {
-
     boolean addBook(Book book, String authorName);
     boolean deleteBook(String title, String authorName);
     boolean addAuthor(String authorName);
