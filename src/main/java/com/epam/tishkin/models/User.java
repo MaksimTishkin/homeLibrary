@@ -1,6 +1,7 @@
 package com.epam.tishkin.models;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -14,7 +15,7 @@ public class User {
     @Column (name = "Role")
     @Enumerated(EnumType.STRING)
     private Role role;
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Bookmark> bookmarks;
 
     public User() {
@@ -24,6 +25,8 @@ public class User {
     public User(String login, String password, Role role) {
         this.login = login;
         this.password = password;
+        this.role = role;
+        bookmarks = new ArrayList<>();
     }
 
     public String getLogin() {

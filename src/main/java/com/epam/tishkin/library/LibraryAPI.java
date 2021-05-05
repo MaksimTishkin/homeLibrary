@@ -1,12 +1,8 @@
 package com.epam.tishkin.library;
 
-import com.epam.tishkin.dao.DBConnector;
-import com.epam.tishkin.dao.LibraryDAO;
-import com.epam.tishkin.dao.LibraryDatabaseDAO;
-import com.epam.tishkin.client.Administrator;
-import com.epam.tishkin.client.Visitor;
+import com.epam.tishkin.dao.*;
 import com.epam.tishkin.models.Book;
-import com.epam.tishkin.models.User;
+import com.epam.tishkin.models.Role;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -17,12 +13,12 @@ import java.util.Properties;
 public class LibraryAPI {
     private static final Properties properties = new Properties();
     final static Logger logger = LogManager.getLogger(LibraryAPI.class);
+    private final UserDAO userDAO;
     private final LibraryDAO libraryDAO;
-    private final User user;
 
-    public LibraryAPI(User user, DBConnector connector) {
-        this.user = user;
-        libraryDAO = new LibraryDatabaseDAO(connector);
+    public LibraryAPI(UserDAO userDAO) {
+        libraryDAO = new LibraryDatabaseDAO();
+        this.userDAO = userDAO;
     }
 
     public void startLibraryUse() {
@@ -43,7 +39,7 @@ public class LibraryAPI {
                 System.out.println("13 Find a book by year, number of pages, and title");
                 System.out.println("14 Find books with my bookmark");
                 System.out.println("15 Exit");
-                if (visitor instanceof Administrator) {
+                if (userDAO.getUser().getRole() == Role.ADMINISTRATOR) {
                     System.out.println("16 Settings (for administrators only)");
                 }
                 String request = reader.readLine();
@@ -92,9 +88,10 @@ public class LibraryAPI {
                         break;
                     case "15":
                         libraryDAO.closeConnection();
+                        userDAO.closeConnection();
                         return;
                     case "16":
-                        if (visitor instanceof Administrator) {
+                        if (userDAO.getUser().getRole() == Role.ADMINISTRATOR) {
                             useAdditionalAdministratorFeatures(reader);
                         }
                         break;
@@ -154,7 +151,7 @@ public class LibraryAPI {
         }
         currentBook = new Book(bookTitle, ISBNumber, publicationYear, pagesNumber);
         if (libraryDAO.addBook(currentBook, bookAuthor)) {
-            writeToHistory(visitor.getName() + ": new book added " + currentBook);
+            writeToHistory(userDAO.getUser().getLogin() + ": new book added " + currentBook);
         }
     }
 
@@ -164,7 +161,7 @@ public class LibraryAPI {
         System.out.println("Enter the book author");
         String bookAuthor = reader.readLine();
         if (libraryDAO.deleteBook(bookTitle, bookAuthor)) {
-            writeToHistory(visitor.getName() + ": book deleted " + bookTitle + "author: " + bookAuthor);
+            writeToHistory(userDAO.getUser().getLogin() + ": book deleted " + bookTitle + "author: " + bookAuthor);
         }
     }
 
@@ -172,7 +169,7 @@ public class LibraryAPI {
         System.out.println("Enter the author's name");
         String bookAuthor = reader.readLine();
         if (libraryDAO.addAuthor(bookAuthor)) {
-            writeToHistory(visitor.getName() + ": new author added " + bookAuthor);
+            writeToHistory(userDAO.getUser().getLogin() + ": new author added " + bookAuthor);
         }
     }
 
@@ -180,7 +177,7 @@ public class LibraryAPI {
         System.out.println("Enter the author's name");
         String bookAuthor = reader.readLine();
         if (libraryDAO.deleteAuthor(bookAuthor)) {
-            writeToHistory(visitor.getName() + ": author deleted: " + bookAuthor);
+            writeToHistory(userDAO.getUser().getLogin() + ": author deleted: " + bookAuthor);
         }
     }
 
@@ -188,28 +185,28 @@ public class LibraryAPI {
         System.out.println("Enter the path to the folder");
         String fileName = reader.readLine();
         int booksAdded = libraryDAO.addBooksFromCSV(fileName);
-        writeToHistory(visitor.getName() + ": number of books added from CSV catalog: " + booksAdded);
+        writeToHistory(userDAO.getUser().getLogin() + ": number of books added from CSV catalog: " + booksAdded);
     }
 
     private void addBooksFromJSONcatalog(BufferedReader reader) throws IOException {
         System.out.println("Enter the path to the folder");
         String fileName = reader.readLine();
         long booksAdded = libraryDAO.addBooksFromJSON(fileName);
-        writeToHistory(visitor.getName() + ": number of books added from JSON catalog: " + booksAdded);
+        writeToHistory(userDAO.getUser().getLogin() + ": number of books added from JSON catalog: " + booksAdded);
     }
 
     private void searchBookForTitle(BufferedReader reader) throws IOException {
         System.out.println("Enter part of the book title");
         String bookTitle = reader.readLine();
         libraryDAO.searchBookForTitle(bookTitle);
-        writeToHistory(visitor.getName() + ": search for books by title: " + bookTitle);
+        writeToHistory(userDAO.getUser().getLogin() + ": search for books by title: " + bookTitle);
         }
 
     private void searchBooksForAuthor(BufferedReader reader) throws IOException {
         System.out.println("Enter part of the author's name");
         String bookAuthor = reader.readLine();
         libraryDAO.searchBooksForAuthor(bookAuthor);
-        writeToHistory(visitor.getName() + ": find books by author: " + bookAuthor);
+        writeToHistory(userDAO.getUser().getLogin() + ": find books by author: " + bookAuthor);
     }
 
     private void searchBookForISBNumber(BufferedReader reader) throws IOException {
@@ -226,7 +223,7 @@ public class LibraryAPI {
             return;
         }
         if (libraryDAO.searchBookForISBN(number)) {
-            writeToHistory(visitor.getName() + ": Book found by ISBN: " + number);
+            writeToHistory(userDAO.getUser().getLogin() + ": Book found by ISBN: " + number);
         }
     }
 
@@ -243,7 +240,7 @@ public class LibraryAPI {
                 return;
             }
             libraryDAO.searchBooksByYearRange(initialYear, finalYear);
-            writeToHistory(visitor.getName() + ": find books by year range " + initialYear + " - " + finalYear);
+            writeToHistory(userDAO.getUser().getLogin() + ": find books by year range " + initialYear + " - " + finalYear);
         } catch (NumberFormatException e) {
             logger.info("Incorrect year specified: initial year " + firstValue + " final year " + secondValue);
         }
@@ -258,13 +255,12 @@ public class LibraryAPI {
             System.out.println("Enter part of the book title");
             String bookTitle = reader.readLine();
             libraryDAO.searchBookByYearPagesNumberAndTitle(year, pagesNumber, bookTitle);
-            writeToHistory(visitor.getName() + ": find books by year, pages and title ");
+            writeToHistory(userDAO.getUser().getLogin() + ": find books by year, pages and title ");
         } catch (NumberFormatException e) {
             logger.info("Incorrect input data");
         }
     }
-
-    private void addBookmark(BufferedReader reader) throws IOException {
+    public void addBookmark(BufferedReader reader) throws IOException {
         String page = "";
         System.out.println("Enter the book title");
         String bookTitle = reader.readLine();
@@ -281,9 +277,8 @@ public class LibraryAPI {
                 logger.info(pageNumber + " Invalid page value");
                 return;
             }
-            visitor.addBookmark(bookTitle, pageNumber);
-            logger.info("Bookmark added - book title: " + bookTitle + " page: " + pageNumber);
-            writeToHistory(visitor.getName() + ": Bookmark added - book title: " + bookTitle + " page: " + pageNumber);
+            userDAO.addBookmark(bookTitle, pageNumber);
+            writeToHistory(userDAO.getUser().getLogin() + ": Bookmark added - book title: " + bookTitle + " page: " + pageNumber);
         } catch (NumberFormatException e) {
             logger.info(page + " Invalid page value");
         }
@@ -292,24 +287,15 @@ public class LibraryAPI {
     private void deleteBookmark(BufferedReader reader) throws IOException {
         System.out.println("Enter the book title");
         String bookTitle = reader.readLine();
-        if (visitor.deleteBookmark(bookTitle)) {
-            logger.info("Bookmark deleted - book title: " + bookTitle);
-            writeToHistory(visitor.getName() + ": Bookmark deleted - book title: " + bookTitle);
-        } else {
-            logger.info("There is no bookmark in this book: " + bookTitle);
+        if (userDAO.deleteBookmark(bookTitle)) {
+            writeToHistory(userDAO.getUser().getLogin() + ": Bookmark deleted - book title: " + bookTitle);
         }
     }
 
     private void showBooksWithBookmarks() {
-        if (visitor.getMyBookmarks().isEmpty()) {
-            logger.info("No books with bookmarks");
-        } else {
-            visitor.getMyBookmarks().forEach(b -> logger.info("Book with bookmark - " + b.getTitle()
-            + " on page " + b.getPage()));
-        }
-        writeToHistory(visitor.getName() + ": Show books with visitor's bookmark");
+        userDAO.showBooksWithBookmarks();
+        writeToHistory(userDAO.getUser().getLogin() + ": Show books with visitor's bookmark");
     }
-
 
     private static void writeToHistory (String message){
         try (FileReader readerForProperties = new FileReader("src/main/resources/config.properties")) {
@@ -332,40 +318,34 @@ public class LibraryAPI {
         String request = reader.readLine();
         switch (request) {
             case "1":
-                addNewUser(reader);
+                addUser(reader);
                 break;
             case "2":
                 blockUser(reader);
                 break;
             case "3":
-                showHistory();
+                showHistory(reader);
                 break;
             case "4":
                 break;
         }
     }
 
-    private void addNewUser(BufferedReader reader) throws IOException {
-        Administrator administrator = (Administrator) visitor;
-        System.out.println("Enter login");
+    private void addUser(BufferedReader reader) throws IOException {
+        System.out.println("Enter user login");
         String login = reader.readLine();
-        System.out.println("Enter password");
+        System.out.println("Enter user password");
         String password = reader.readLine();
-        administrator.addNewUser(login, password);
-        logger.info(administrator.getName() + " added new user - " + login + "with password - " + password);
+        userDAO.addUser(login, password);
     }
 
     private void blockUser(BufferedReader reader) throws IOException {
-        Administrator administrator = (Administrator) visitor;
-        System.out.println("Enter login");
+        System.out.println("Enter user login");
         String login = reader.readLine();
-        administrator.blockUser(login);
-        logger.info(administrator.getName() + " Deleted the user - " + login);
+        userDAO.blockUser(login);
     }
 
-    private void showHistory() {
-        Administrator administrator = (Administrator) visitor;
-        administrator.showHistory();
-        logger.info(administrator.getName() + " the history of actions is shown");
+    private void showHistory(BufferedReader reader) {
+        userDAO.showHistory();
     }
 }

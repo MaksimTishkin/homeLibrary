@@ -5,6 +5,5 @@ public enum Role {
     VISITOR;
 
     Role() {
-
     }
 }

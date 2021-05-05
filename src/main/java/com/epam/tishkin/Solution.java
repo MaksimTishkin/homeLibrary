@@ -1,8 +1,5 @@
 package com.epam.tishkin;
 
-import com.epam.tishkin.authorization.handler.Handler;
-import com.epam.tishkin.authorization.handler.LoginHandler;
-import com.epam.tishkin.client.Visitor;
 import com.epam.tishkin.dao.UserDAO;
 import com.epam.tishkin.dao.UserDatabaseDAO;
 import com.epam.tishkin.exception.InvalidAutorizationException;
@@ -28,8 +25,9 @@ public class Solution {
             password = consoleReader.readLine();
 
             UserDAO userDAO = new UserDatabaseDAO();
-            User user = userDAO.getUser(login, password);
-            LibraryAPI libraryAPI = new LibraryAPI(user);
+            User user = userDAO.userAuthorization(login, password);
+            userDAO.setUser(user);
+            LibraryAPI libraryAPI = new LibraryAPI(userDAO);
             libraryAPI.startLibraryUse();
         } catch (InvalidAutorizationException | IOException e) {
             logger.error(e.getMessage());
