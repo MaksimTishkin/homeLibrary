@@ -1,11 +1,10 @@
 package com.epam.tishkin.dao;
 
-import com.epam.tishkin.exception.InvalidAutorizationException;
 import com.epam.tishkin.models.User;
 
 public interface UserDAO {
-
-    User userAuthorization(String login, String password) throws InvalidAutorizationException;
+    boolean userAuthorization(String login, String password);
+    User getUser();
     void addUser(String login, String password);
     void blockUser(String login);
     void showHistory();
@@ -13,6 +12,4 @@ public interface UserDAO {
     boolean deleteBookmark(String bookTitle);
     void showBooksWithBookmarks();
     void closeConnection();
-    User getUser();
-    void setUser(User user);
 }

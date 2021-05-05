@@ -1,7 +1,5 @@
 package com.epam.tishkin.dao;
 
-import com.epam.tishkin.exception.InvalidAutorizationException;
-import com.epam.tishkin.models.Book;
 import com.epam.tishkin.models.Bookmark;
 import com.epam.tishkin.models.Role;
 import com.epam.tishkin.models.User;
@@ -25,16 +23,18 @@ public class UserDatabaseDAO implements UserDAO {
         connector = new DBConnector();
     }
 
-    public User userAuthorization(String login, String password) throws InvalidAutorizationException {
+    public boolean userAuthorization(String login, String password) {
         try (Session session = connector.openSession()) {
-            User user = session.get(User.class, login);
+            user = session.get(User.class, login);
             if (user != null) {
                 if (user.getPassword().equals(password)) {
-                    return user;
+                    logger.info(login + " is connected");
+                    return true;
                 }
             }
         }
-        throw new InvalidAutorizationException("Incorrect login/password");
+        logger.info("Incorrect login/password");
+        return false;
     }
 
     public void addUser(String login, String password) {
@@ -81,6 +81,7 @@ public class UserDatabaseDAO implements UserDAO {
         try (Session session = connector.openSession()) {
             Transaction transaction = session.beginTransaction();
             Bookmark bookmark = new Bookmark(bookTitle, pageNumber);
+            user = session.get(User.class, user.getLogin());
             user.addBookmark(bookmark);
             session.save(user);
             transaction.commit();
@@ -89,44 +90,44 @@ public class UserDatabaseDAO implements UserDAO {
     }
 
     public boolean deleteBookmark(String bookTitle) {
-        Optional<Bookmark> bookmark = user.getBookmarks()
-                .stream()
-                .filter(b -> bookTitle.equals(b.getTitle()))
-                .findFirst();
-        if (bookmark.isPresent()) {
-            try (Session session = connector.openSession()) {
-                Transaction transaction = session.beginTransaction();
+        try (Session session = connector.openSession()) {
+            Transaction transaction = session.beginTransaction();
+            user = session.get(User.class, user.getLogin());
+            Optional<Bookmark> bookmark = user.getBookmarks()
+                    .stream()
+                    .filter(b -> bookTitle.equals(b.getTitle()))
+                    .findFirst();
+            if (bookmark.isPresent()) {
                 user.removeBookmark(bookmark.get());
                 session.save(user);
                 transaction.commit();
                 logger.info("Bookmark deleted - book title: " + bookTitle);
                 return true;
+            } else {
+                logger.info("There is no bookmark in this book: " + bookTitle);
             }
-        } else {
-            logger.info("There is no bookmark in this book: " + bookTitle);
+            return false;
         }
-        return false;
     }
 
     public void showBooksWithBookmarks() {
-        List<Bookmark> bookmarks = user.getBookmarks();
-        if (!bookmarks.isEmpty()) {
-            bookmarks.forEach(b -> logger.info("Book with bookmark - " + b.getTitle()
-                    + " on page " + b.getPage()));
-        } else {
-            logger.info("No books with bookmarks");
+        try (Session session = connector.openSession()) {
+            user = session.get(User.class, user.getLogin());
+            List<Bookmark> bookmarks = user.getBookmarks();
+            if (!bookmarks.isEmpty()) {
+                bookmarks.forEach(b -> logger.info("Book with bookmark - " + b.getTitle()
+                        + " on page " + b.getPage()));
+            } else {
+                logger.info("No books with bookmarks");
+            }
         }
-    }
-
-    public void closeConnection() {
-        connector.closeSessionFactory();
     }
 
     public User getUser() {
         return user;
     }
 
-    public void setUser(User user) {
-        this.user = user;
+    public void closeConnection() {
+        connector.closeSessionFactory();
     }
 }
