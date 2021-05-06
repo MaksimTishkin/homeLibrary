@@ -13,8 +13,10 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
+import java.util.Properties;
 
 public class UserDatabaseDAO implements UserDAO {
+    private static final Properties properties = new Properties();
     final static Logger logger = LogManager.getLogger(UserDatabaseDAO.class);
     private final DBConnector connector;
     private User user;
@@ -67,7 +69,12 @@ public class UserDatabaseDAO implements UserDAO {
     }
 
     public void showHistory() {
-        try (BufferedReader reader = new BufferedReader(new FileReader("src/main/resources/history.txt"))) {
+        try (FileReader readerForProperties = new FileReader("src/main/resources/config.properties")) {
+            properties.load(readerForProperties);
+        } catch (IOException e) {
+            logger.error(e.getMessage());
+        }
+        try (BufferedReader reader = new BufferedReader(new FileReader(properties.getProperty("pathFromHistory")))) {
             String line;
             while ((line = reader.readLine()) != null) {
                 System.out.println(line);

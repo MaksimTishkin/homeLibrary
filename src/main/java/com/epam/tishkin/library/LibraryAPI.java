@@ -161,7 +161,7 @@ public class LibraryAPI {
         System.out.println("Enter the book author");
         String bookAuthor = reader.readLine();
         if (libraryDAO.deleteBook(bookTitle, bookAuthor)) {
-            writeToHistory(userDAO.getUser().getLogin() + ": book deleted " + bookTitle + "author: " + bookAuthor);
+            writeToHistory(userDAO.getUser().getLogin() + ": book deleted " + bookTitle + " author: " + bookAuthor);
         }
     }
 
