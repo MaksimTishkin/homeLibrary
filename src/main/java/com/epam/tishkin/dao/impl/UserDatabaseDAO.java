@@ -1,5 +1,6 @@
-package com.epam.tishkin.dao;
+package com.epam.tishkin.dao.impl;
 
+import com.epam.tishkin.dao.UserDAO;
 import com.epam.tishkin.models.Bookmark;
 import com.epam.tishkin.models.Role;
 import com.epam.tishkin.models.User;
@@ -22,7 +23,7 @@ public class UserDatabaseDAO implements UserDAO {
     private User user;
 
     public UserDatabaseDAO() {
-        connector = new DBConnector();
+        connector = DBConnector.getConnector();
     }
 
     public boolean userAuthorization(String login, String password) {

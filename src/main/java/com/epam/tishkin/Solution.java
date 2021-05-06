@@ -1,7 +1,7 @@
 package com.epam.tishkin;
 
 import com.epam.tishkin.dao.UserDAO;
-import com.epam.tishkin.dao.UserDatabaseDAO;
+import com.epam.tishkin.dao.impl.UserDatabaseDAO;
 import com.epam.tishkin.library.LibraryAPI;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

@@ -1,6 +1,7 @@
 package com.epam.tishkin.library;
 
 import com.epam.tishkin.dao.*;
+import com.epam.tishkin.dao.impl.LibraryDatabaseDAO;
 import com.epam.tishkin.models.Book;
 import com.epam.tishkin.models.Role;
 import org.apache.logging.log4j.LogManager;
@@ -104,9 +105,9 @@ public class LibraryAPI {
     }
 
     private void addNewBook(BufferedReader reader) throws IOException {
-        int publicationYear;
+        Integer publicationYear;
         String ISBNumber;
-        int pagesNumber;
+        Integer pagesNumber;
         Book currentBook;
         System.out.println("Enter the book title");
         String bookTitle = reader.readLine();
@@ -114,38 +115,21 @@ public class LibraryAPI {
         String bookAuthor = reader.readLine();
         System.out.println("Enter the book ISBN number");
         ISBNumber = reader.readLine();
-        if (ISBNumber.length() != 13) {
-            logger.info("Incorrect ISBNumber: " + ISBNumber);
-            return;
-        }
-        try {
-            Long.parseLong(ISBNumber);
-        } catch (NumberFormatException e) {
+        if (!isISBNumberCorrect(ISBNumber)) {
             logger.info("Incorrect ISBNumber: " + ISBNumber);
             return;
         }
         System.out.println("Enter the year of publication");
         String year = reader.readLine();
-        try {
-            publicationYear = Integer.parseInt(year);
-            int currentYear = Year.now().getValue();
-            if (publicationYear > currentYear) {
-                logger.info("Incorrect year of publication: " + year);
-                return;
-            }
-        } catch (NumberFormatException e) {
+        publicationYear = checkYearOfPublication(year);
+        if (publicationYear == null) {
             logger.info("Incorrect year of publication: " + year);
             return;
         }
         System.out.println("Enter the number of pages");
         String number = reader.readLine();
-        try {
-            pagesNumber = Integer.parseInt(number);
-            if (pagesNumber <= 0) {
-                logger.info("Invalid page value: " + number);
-                return;
-            }
-        } catch (NumberFormatException e) {
+        pagesNumber = checkNumberOfPages(number);
+        if (pagesNumber == null) {
             logger.info("Invalid page value: " + number);
             return;
         }
@@ -212,14 +196,8 @@ public class LibraryAPI {
     private void searchBookForISBNumber(BufferedReader reader) throws IOException {
         System.out.println("Enter book's ISBN number");
         String number = reader.readLine();
-        if (number.length() != 13) {
-            logger.info("Incorrect ISBN number: " + number);
-            return;
-        }
-        try {
-            Long.parseLong(number);
-        } catch (NumberFormatException e) {
-            logger.info("Incorrect ISBN number: " + number);
+        if (!isISBNumberCorrect(number)) {
+            logger.info("Incorrect ISBNumber: " + number);
             return;
         }
         if (libraryDAO.searchBookForISBN(number)) {
@@ -261,7 +239,6 @@ public class LibraryAPI {
         }
     }
     public void addBookmark(BufferedReader reader) throws IOException {
-        String page = "";
         System.out.println("Enter the book title");
         String bookTitle = reader.readLine();
         Book book = libraryDAO.findBookByFullTitle(bookTitle);
@@ -270,18 +247,14 @@ public class LibraryAPI {
             return;
         }
         System.out.println("Enter the page number");
-        try {
-            page = reader.readLine();
-            int pageNumber = Integer.parseInt(page);
-            if (pageNumber <= 0 || pageNumber > book.getPagesNumber()) {
-                logger.info(pageNumber + " Invalid page value");
-                return;
-            }
-            userDAO.addBookmark(bookTitle, pageNumber);
-            writeToHistory(userDAO.getUser().getLogin() + ": Bookmark added - book title: " + bookTitle + " page: " + pageNumber);
-        } catch (NumberFormatException e) {
-            logger.info(page + " Invalid page value");
+        String page = reader.readLine();
+        Integer pageNumber = checkNumberOfPages(page);
+        if (pageNumber == null || pageNumber > book.getPagesNumber()) {
+            logger.info(pageNumber + " Invalid page value");
+            return;
         }
+        userDAO.addBookmark(bookTitle, pageNumber);
+        writeToHistory(userDAO.getUser().getLogin() + ": Bookmark added - book title: " + bookTitle + " page: " + pageNumber);
     }
 
     private void deleteBookmark(BufferedReader reader) throws IOException {
@@ -310,6 +283,46 @@ public class LibraryAPI {
        }
     }
 
+    private boolean isISBNumberCorrect(String number) {
+        if (number.length() != 13) {
+            return false;
+        }
+        try {
+            Long.parseLong(number);
+        } catch (NumberFormatException e) {
+            return false;
+        }
+        return true;
+    }
+
+    private Integer checkYearOfPublication(String year) {
+        int publicationYear;
+        try {
+            publicationYear = Integer.parseInt(year);
+            int currentYear = Year.now().getValue();
+            int yearOfFirstBookInWorld = 1457;
+            if (publicationYear < yearOfFirstBookInWorld || publicationYear > currentYear) {
+                return null;
+            }
+        } catch (NumberFormatException e) {
+            return null;
+        }
+        return publicationYear;
+    }
+
+    private Integer checkNumberOfPages(String number) {
+        int pagesNumber;
+        try {
+            pagesNumber = Integer.parseInt(number);
+            if (pagesNumber <= 0) {
+                return null;
+            }
+        } catch (NumberFormatException e) {
+            return null;
+        }
+        return pagesNumber;
+    }
+
     private void useAdditionalAdministratorFeatures(BufferedReader reader) throws IOException {
         System.out.println("1 Add a new user");
         System.out.println("2 Block user");
@@ -324,7 +337,7 @@ public class LibraryAPI {
                 blockUser(reader);
                 break;
             case "3":
-                showHistory(reader);
+                showHistory();
                 break;
             case "4":
                 break;
@@ -345,7 +358,7 @@ public class LibraryAPI {
         userDAO.blockUser(login);
     }
 
-    private void showHistory(BufferedReader reader) {
+    private void showHistory() {
         userDAO.showHistory();
     }
 }

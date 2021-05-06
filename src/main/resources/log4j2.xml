@@ -17,7 +17,7 @@
         </Logger>
 
         <!-- Root Logger -->
-        <Root level="all">
+        <Root level="error">
             <AppenderRef ref="FILE"/>
         </Root>
     </Loggers>

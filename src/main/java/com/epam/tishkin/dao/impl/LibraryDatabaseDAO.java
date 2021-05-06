@@ -1,5 +1,6 @@
-package com.epam.tishkin.dao;
+package com.epam.tishkin.dao.impl;
 
+import com.epam.tishkin.dao.LibraryDAO;
 import com.epam.tishkin.models.Author;
 import com.epam.tishkin.models.AuthorsList;
 import com.epam.tishkin.models.Book;
@@ -20,7 +21,7 @@ public class LibraryDatabaseDAO implements LibraryDAO {
     private final DBConnector connector;
 
     public LibraryDatabaseDAO() {
-        connector = new DBConnector();
+        connector = DBConnector.getConnector();
     }
 
     public boolean addBook(Book book, String authorName) {
