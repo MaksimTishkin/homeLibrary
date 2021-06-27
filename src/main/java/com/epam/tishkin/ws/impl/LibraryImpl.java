@@ -5,6 +5,7 @@ import com.epam.tishkin.models.Author;
 import com.epam.tishkin.models.AuthorsList;
 import com.epam.tishkin.models.Book;
 import com.google.gson.Gson;
+import jakarta.jws.WebService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.hibernate.Session;
@@ -17,6 +18,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
 
+@WebService(endpointInterface = "com.epam.tishkin.ws.Library")
 public class LibraryImpl implements Library {
     final static Logger logger = LogManager.getLogger(LibraryImpl.class);
 

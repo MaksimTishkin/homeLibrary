@@ -352,7 +352,7 @@ public class LibraryClient {
             logger.info(pageNumber + " Invalid page value");
             return;
         }
-        visitor.addBookmark(bookTitle, pageNumber);
+        visitor.addBookmark(bookTitle, pageNumber, user.getLogin());
         //writeToHistory(visitor.getUser().getLogin() + ": Bookmark added - book title: " + bookTitle + " page: " + pageNumber);
     }
 
@@ -366,13 +366,13 @@ public class LibraryClient {
     private void deleteBookmark(BufferedReader reader) throws IOException {
         System.out.println("Enter the book title");
         String bookTitle = reader.readLine();
-        if (visitor.deleteBookmark(bookTitle)) {
+        if (visitor.deleteBookmark(bookTitle, user.getLogin())) {
             //writeToHistory(visitor.getUser().getLogin() + ": Bookmark deleted - book title: " + bookTitle);
         }
     }
 
     private void showBooksWithBookmarks() {
-        visitor.showBooksWithBookmarks();
+        visitor.showBooksWithBookmarks(user.getLogin());
         //writeToHistory(visitor.getUser().getLogin() + ": Show books with visitor's bookmark");
     }
 

@@ -25,7 +25,6 @@ import java.util.Properties;
 public class VisitorImpl implements Visitor {
     private static final Properties properties = new Properties();
     final static Logger logger = LogManager.getLogger(VisitorImpl.class);
-    private User user;
 
     @Resource
     WebServiceContext webServiceContext;
@@ -44,7 +43,7 @@ public class VisitorImpl implements Visitor {
             password = passList.get(0).toString();
         }
         try (Session session = HibernateUtil.getSession()) {
-            user = session.get(User.class, login);
+            User user = session.get(User.class, login);
             if (user != null) {
                 if (user.getPassword().equals(password)) {
                     logger.info(login + " is connected");
@@ -100,21 +99,21 @@ public class VisitorImpl implements Visitor {
         }
     }
 
-    public void addBookmark(String bookTitle, int pageNumber) {
+    public void addBookmark(String bookTitle, int pageNumber, String login) {
         try (Session session = HibernateUtil.getSession()) {
             Transaction transaction = session.beginTransaction();
             Bookmark bookmark = new Bookmark(bookTitle, pageNumber);
-            user = session.get(User.class, user.getLogin());
+            User user = session.get(User.class, login);
             user.addBookmark(bookmark);
             session.save(user);
             transaction.commit();
         }
     }
 
-    public boolean deleteBookmark(String bookTitle) {
+    public boolean deleteBookmark(String bookTitle, String login) {
         try (Session session = HibernateUtil.getSession()) {
             Transaction transaction = session.beginTransaction();
-            user = session.get(User.class, user.getLogin());
+            User user = session.get(User.class, login);
             Optional<Bookmark> bookmark = user.getBookmarks()
                     .stream()
                     .filter(b -> bookTitle.equals(b.getTitle()))
@@ -132,9 +131,9 @@ public class VisitorImpl implements Visitor {
         }
     }
 
-    public void showBooksWithBookmarks() {
+    public void showBooksWithBookmarks(String login) {
         try (Session session = HibernateUtil.getSession()) {
-            user = session.get(User.class, user.getLogin());
+            User user = session.get(User.class, login);
             List<Bookmark> bookmarks = user.getBookmarks();
             if (!bookmarks.isEmpty()) {
                 bookmarks.forEach(b -> logger.info("Book with bookmark - " + b.getTitle()
