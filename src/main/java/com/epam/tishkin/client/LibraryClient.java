@@ -1,9 +1,9 @@
 package com.epam.tishkin.client;
 
+import com.epam.tishkin.models.Bookmark;
 import com.epam.tishkin.models.User;
 import com.epam.tishkin.ws.*;
 import com.epam.tishkin.ws.impl.HistoryWriter;
-import com.epam.tishkin.ws.impl.LibraryImpl;
 import com.epam.tishkin.models.Book;
 import com.epam.tishkin.models.Role;
 import jakarta.xml.ws.BindingProvider;
@@ -34,7 +34,7 @@ public class LibraryClient {
         libraryConnection();
         visitorConnection();
         while((user = authorization()) == null) {
-            System.out.println("Incorrect login/password");
+            logger.info("Incorrect login/password");
         }
         startLibraryUse();
     }
@@ -240,7 +240,7 @@ public class LibraryClient {
         String filePath = reader.readLine();
         if (isFileExtensionCorrect(filePath)) {
             File file = new File(filePath);
-            int booksAdded = library.addBooksFromCSV(file);
+            int booksAdded = library.addBooksFromCatalog(file);
             logger.info("Number of books added from catalog: " + booksAdded);
         } else {
             logger.info("Incorrect file's type");
@@ -257,27 +257,37 @@ public class LibraryClient {
     private void searchBookForTitle(BufferedReader reader) throws IOException {
         System.out.println("Enter part of the book title");
         String bookTitle = reader.readLine();
-        library.searchBookForTitle(bookTitle);
-        writeToHistory(visitor.getUser().getLogin() + ": search for books by title: " + bookTitle);
+        List<Book> foundBooks = library.searchBookForTitle(bookTitle);
+        if (foundBooks.isEmpty()) {
+            logger.info("No books found");
+        } else {
+            logger.info(foundBooks);
         }
+        //writeToHistory(visitor.getUser().getLogin() + ": search for books by title: " + bookTitle);
+    }
 
     private void searchBooksForAuthor(BufferedReader reader) throws IOException {
         System.out.println("Enter part of the author's name");
         String bookAuthor = reader.readLine();
-        library.searchBooksForAuthor(bookAuthor);
-        writeToHistory(visitor.getUser().getLogin() + ": find books by author: " + bookAuthor);
+        List<Book> foundBooks = library.searchBooksForAuthor(bookAuthor);
+        if (foundBooks.isEmpty()) {
+            logger.info("No books found");
+        } else {
+            logger.info(foundBooks);
+        }
+        //writeToHistory(visitor.getUser().getLogin() + ": find books by author: " + bookAuthor);
     }
 
     private void searchBookForISBNumber(BufferedReader reader) throws IOException {
         System.out.println("Enter book's ISBN number");
         String number = reader.readLine();
-        if (!isISBNumberCorrect(number)) {
-            logger.info("Incorrect ISBNumber: " + number);
-            return;
+        Book foundBook = library.searchBookForISBN(number);
+        if (foundBook == null) {
+            logger.info("No books found");
+        } else {
+            logger.info(foundBook);
         }
-        if (library.searchBookForISBN(number)) {
-            writeToHistory(visitor.getUser().getLogin() + ": Book found by ISBN: " + number);
-        }
+        //writeToHistory(visitor.getUser().getLogin() + ": Book found by ISBN: " + number);
     }
 
     private void searchBooksForYearRange(BufferedReader reader) throws IOException {
@@ -292,8 +302,13 @@ public class LibraryClient {
                 logger.info("Incorrect year specified: initial year " + initialYear + " final year " + finalYear);
                 return;
             }
-            library.searchBooksByYearRange(initialYear, finalYear);
-            writeToHistory(visitor.getUser().getLogin() + ": find books by year range " + initialYear + " - " + finalYear);
+            List<Book> foundBooks = library.searchBooksByYearRange(initialYear, finalYear);
+            if (foundBooks.isEmpty()) {
+                logger.info("No books found");
+            } else {
+                logger.info(foundBooks);
+            }
+            //writeToHistory(visitor.getUser().getLogin() + ": find books by year range " + initialYear + " - " + finalYear);
         } catch (NumberFormatException e) {
             logger.info("Incorrect year specified: initial year " + firstValue + " final year " + secondValue);
         }
@@ -307,15 +322,24 @@ public class LibraryClient {
             int pagesNumber= Integer.parseInt(reader.readLine());
             System.out.println("Enter part of the book title");
             String bookTitle = reader.readLine();
-            library.searchBookByYearPagesNumberAndTitle(year, pagesNumber, bookTitle);
-            writeToHistory(visitor.getUser().getLogin() + ": find books by year, pages and title ");
+            List<Book> foundBooks = library.searchBookByYearPagesNumberAndTitle(year, pagesNumber, bookTitle);
+            if (foundBooks.isEmpty()) {
+                logger.info("No books found");
+            } else {
+                logger.info(foundBooks);
+            }
+            //writeToHistory(visitor.getUser().getLogin() + ": find books by year, pages and title ");
         } catch (NumberFormatException e) {
             logger.info("Incorrect input data");
         }
     }
-    public void addBookmark(BufferedReader reader) throws IOException {
+    private void addBookmark(BufferedReader reader) throws IOException {
         System.out.println("Enter the book title");
         String bookTitle = reader.readLine();
+        if (isBookmarkAlreadyExist(bookTitle)) {
+            logger.info("There is already a bookmark in this book");
+            return;
+        }
         Book book = library.findBookByFullTitle(bookTitle);
         if (book == null) {
             logger.info(bookTitle + " book not found");
@@ -329,20 +353,27 @@ public class LibraryClient {
             return;
         }
         visitor.addBookmark(bookTitle, pageNumber);
-        writeToHistory(visitor.getUser().getLogin() + ": Bookmark added - book title: " + bookTitle + " page: " + pageNumber);
+        //writeToHistory(visitor.getUser().getLogin() + ": Bookmark added - book title: " + bookTitle + " page: " + pageNumber);
+    }
+
+    private boolean isBookmarkAlreadyExist(String bookTitle) {
+        Optional<Bookmark> bookmark = user.getBookmarks().stream()
+                .filter(b -> bookTitle.equals(b.getTitle()))
+                .findFirst();
+        return bookmark.isPresent();
     }
 
     private void deleteBookmark(BufferedReader reader) throws IOException {
         System.out.println("Enter the book title");
         String bookTitle = reader.readLine();
         if (visitor.deleteBookmark(bookTitle)) {
-            writeToHistory(visitor.getUser().getLogin() + ": Bookmark deleted - book title: " + bookTitle);
+            //writeToHistory(visitor.getUser().getLogin() + ": Bookmark deleted - book title: " + bookTitle);
         }
     }
 
     private void showBooksWithBookmarks() {
         visitor.showBooksWithBookmarks();
-        writeToHistory(visitor.getUser().getLogin() + ": Show books with visitor's bookmark");
+        //writeToHistory(visitor.getUser().getLogin() + ": Show books with visitor's bookmark");
     }
 
     private static void writeToHistory (String message){

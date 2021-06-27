@@ -52,7 +52,6 @@ public class VisitorImpl implements Visitor {
                 }
             }
         }
-        logger.info("Incorrect login/password");
         return null;
     }
 
@@ -109,7 +108,6 @@ public class VisitorImpl implements Visitor {
             user.addBookmark(bookmark);
             session.save(user);
             transaction.commit();
-            logger.info("Bookmark added - book title: " + bookTitle + " page: " + pageNumber);
         }
     }
 

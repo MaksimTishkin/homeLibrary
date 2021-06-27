@@ -108,9 +108,9 @@ public class LibraryImpl implements Library {
         }
     }
 
-    public int addBooksFromCSV(String fileName) {
+    private int addBooksFromCSV(File file) {
         int count = 0;
-        try (BufferedReader reader = new BufferedReader(new FileReader(fileName))) {
+        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
             String line;
             while ((line = reader.readLine()) != null) {
                 String[] bookParameters = line.split(";");
@@ -130,9 +130,9 @@ public class LibraryImpl implements Library {
         return count;
     }
 
-    public int addBooksFromJSON(String fileName) {
+    private int addBooksFromJSON(File file) {
         int count = 0;
-        try (FileReader reader = new FileReader(fileName)) {
+        try (FileReader reader = new FileReader(file)) {
             Gson gson = new Gson();
             AuthorsList list = gson.fromJson(reader, AuthorsList.class);
             for (Author author : list.getAuthors()) {
@@ -148,73 +148,52 @@ public class LibraryImpl implements Library {
         return count;
     }
 
-    public void searchBookForTitle(String title) {
+    public List<Book> searchBookForTitle(String title) {
         try (Session session = HibernateUtil.getSession()) {
             Query<Book> query = session.createQuery("FROM Book WHERE Title LIKE :name", Book.class);
             query.setParameter("name", "%" + title + "%");
-            List<Book> findBooks = query.getResultList();
-            if (findBooks.isEmpty()) {
-                logger.info(title + ": books not found");
-            } else {
-                findBooks.forEach(b -> logger.info(b + ": book found"));
-            }
+            return query.getResultList();
         }
     }
 
-    public void searchBooksForAuthor(String authorName) {
+    public List<Book> searchBooksForAuthor(String authorName) {
         try (Session session = HibernateUtil.getSession()) {
             Query<Book> query = session.createQuery("FROM Book WHERE Author_Name LIKE :name", Book.class);
             query.setParameter("name", "%" + authorName + "%");
-            List<Book> foundBooks = query.getResultList();
-            if (foundBooks.isEmpty()) {
-                logger.info(authorName + ": books by this author were not found");
-            } else {
-                foundBooks.forEach(b -> logger.info(b + ":  book found"));
-            }
+            return query.getResultList();
         }
     }
 
-    public boolean searchBookForISBN(String ISBNumber) {
+    public Book searchBookForISBN(String ISBNumber) {
+        Book book = null;
         try (Session session = HibernateUtil.getSession()) {
             Query<Book> query = session.createQuery("FROM Book WHERE ISBNumber =:number", Book.class);
             query.setParameter("number", ISBNumber);
-            List<Book> foundBook = query.getResultList();
+            List <Book> foundBook = query.getResultList();
             if (!foundBook.isEmpty()) {
-                logger.info(ISBNumber + ": book found " + foundBook.get(0));
-                return true;
+                book = foundBook.get(0);
             }
-            logger.info(ISBNumber + ": the book with this number was not found");
-            return false;
         }
+        return book;
     }
 
-    public void searchBooksByYearRange(int startYear, int finishYear) {
+    public List<Book> searchBooksByYearRange(int startYear, int finishYear) {
         try (Session session = HibernateUtil.getSession()) {
             Query<Book> query = session.createQuery("FROM Book WHERE publicationYear BETWEEN :startYear and :finishYear", Book.class);
             query.setParameter("startYear", startYear);
             query.setParameter("finishYear", finishYear);
-            List<Book> foundBooks = query.getResultList();
-            if (foundBooks.isEmpty()) {
-                logger.info(startYear + " " + finishYear + ": books not found");
-            } else {
-                foundBooks.forEach(b -> logger.info(startYear + " " + finishYear + ": " + b));
-            }
+            return query.getResultList();
         }
     }
 
-    public void searchBookByYearPagesNumberAndTitle(int year, int pages, String title) {
+    public List<Book> searchBookByYearPagesNumberAndTitle(int year, int pages, String title) {
         try (Session session = HibernateUtil.getSession()) {
             Query<Book> query = session.createQuery("FROM Book WHERE publicationYear =:year " +
                     "and pagesNumber =:pages and title LIKE :title", Book.class);
             query.setParameter("year", year);
             query.setParameter("pages", pages);
             query.setParameter("title", "%" + title + "%");
-            List<Book> findBooks = query.getResultList();
-            if (findBooks.isEmpty()) {
-                logger.info("Books not found");
-            } else {
-                findBooks.forEach(b -> logger.info(b + ": book found"));
-            }
+            return query.getResultList();
         }
     }
 
