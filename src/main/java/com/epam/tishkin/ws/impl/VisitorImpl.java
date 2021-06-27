@@ -1,9 +1,13 @@
-package com.epam.tishkin.dao.impl;
+package com.epam.tishkin.ws.impl;
 
-import com.epam.tishkin.dao.UserDAO;
+import com.epam.tishkin.models.User;
+import com.epam.tishkin.ws.Visitor;
 import com.epam.tishkin.models.Bookmark;
 import com.epam.tishkin.models.Role;
-import com.epam.tishkin.models.User;
+import jakarta.annotation.Resource;
+import jakarta.jws.WebService;
+import jakarta.xml.ws.WebServiceContext;
+import jakarta.xml.ws.handler.MessageContext;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.hibernate.Session;
@@ -13,35 +17,47 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
 
-public class UserDatabaseDAO implements UserDAO {
+@WebService(endpointInterface = "com.epam.tishkin.ws.Visitor")
+public class VisitorImpl implements Visitor {
     private static final Properties properties = new Properties();
-    final static Logger logger = LogManager.getLogger(UserDatabaseDAO.class);
-    private final DBConnector connector;
+    final static Logger logger = LogManager.getLogger(VisitorImpl.class);
     private User user;
 
-    public UserDatabaseDAO() {
-        connector = DBConnector.getConnector();
-    }
+    @Resource
+    WebServiceContext webServiceContext;
 
-    public boolean userAuthorization(String login, String password) {
-        try (Session session = connector.openSession()) {
+    public User userAuthorization() {
+        MessageContext messageContext = webServiceContext.getMessageContext();
+        Map<?, ?> http_headers = (Map<?, ?>) messageContext.get(MessageContext.HTTP_REQUEST_HEADERS);
+        List<?> userList = (List<?>) http_headers.get("Username");
+        List<?> passList = (List<?>) http_headers.get("Password");
+        String login = "";
+        String password = "";
+        if(userList != null) {
+            login = userList.get(0).toString();
+        }
+        if(passList != null) {
+            password = passList.get(0).toString();
+        }
+        try (Session session = HibernateUtil.getSession()) {
             user = session.get(User.class, login);
             if (user != null) {
                 if (user.getPassword().equals(password)) {
                     logger.info(login + " is connected");
-                    return true;
+                    return user;
                 }
             }
         }
         logger.info("Incorrect login/password");
-        return false;
+        return null;
     }
 
     public void addUser(String login, String password) {
-        try (Session session = connector.openSession()) {
+        try (Session session = HibernateUtil.getSession()) {
             Transaction transaction = session.beginTransaction();
             User visitor = session.get(User.class, login);
             if (visitor == null) {
@@ -56,7 +72,7 @@ public class UserDatabaseDAO implements UserDAO {
     }
 
     public void blockUser(String login) {
-        try (Session session = connector.openSession()) {
+        try (Session session = HibernateUtil.getSession()) {
             Transaction transaction = session.beginTransaction();
             User visitor = session.get(User.class, login);
             if (visitor != null) {
@@ -86,7 +102,7 @@ public class UserDatabaseDAO implements UserDAO {
     }
 
     public void addBookmark(String bookTitle, int pageNumber) {
-        try (Session session = connector.openSession()) {
+        try (Session session = HibernateUtil.getSession()) {
             Transaction transaction = session.beginTransaction();
             Bookmark bookmark = new Bookmark(bookTitle, pageNumber);
             user = session.get(User.class, user.getLogin());
@@ -98,7 +114,7 @@ public class UserDatabaseDAO implements UserDAO {
     }
 
     public boolean deleteBookmark(String bookTitle) {
-        try (Session session = connector.openSession()) {
+        try (Session session = HibernateUtil.getSession()) {
             Transaction transaction = session.beginTransaction();
             user = session.get(User.class, user.getLogin());
             Optional<Bookmark> bookmark = user.getBookmarks()
@@ -119,7 +135,7 @@ public class UserDatabaseDAO implements UserDAO {
     }
 
     public void showBooksWithBookmarks() {
-        try (Session session = connector.openSession()) {
+        try (Session session = HibernateUtil.getSession()) {
             user = session.get(User.class, user.getLogin());
             List<Bookmark> bookmarks = user.getBookmarks();
             if (!bookmarks.isEmpty()) {
@@ -129,13 +145,5 @@ public class UserDatabaseDAO implements UserDAO {
                 logger.info("No books with bookmarks");
             }
         }
-    }
-
-    public User getUser() {
-        return user;
-    }
-
-    public void closeConnection() {
-        connector.closeSessionFactory();
     }
 }

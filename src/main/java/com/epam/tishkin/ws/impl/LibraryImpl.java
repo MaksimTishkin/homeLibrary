@@ -1,6 +1,6 @@
-package com.epam.tishkin.dao.impl;
+package com.epam.tishkin.ws.impl;
 
-import com.epam.tishkin.dao.LibraryDAO;
+import com.epam.tishkin.ws.Library;
 import com.epam.tishkin.models.Author;
 import com.epam.tishkin.models.AuthorsList;
 import com.epam.tishkin.models.Book;
@@ -12,20 +12,16 @@ import org.hibernate.Transaction;
 import org.hibernate.query.Query;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
 
-public class LibraryDatabaseDAO implements LibraryDAO {
-    final static Logger logger = LogManager.getLogger(LibraryDatabaseDAO.class);
-    private final DBConnector connector;
-
-    public LibraryDatabaseDAO() {
-        connector = DBConnector.getConnector();
-    }
+public class LibraryImpl implements Library {
+    final static Logger logger = LogManager.getLogger(LibraryImpl.class);
 
     public boolean addBook(Book book, String authorName) {
-        try (Session session = connector.openSession()) {
+        try (Session session = HibernateUtil.getSession()) {
             Transaction transaction = session.beginTransaction();
             Author author = session.get(Author.class, authorName);
             if (author == null) {
@@ -49,7 +45,7 @@ public class LibraryDatabaseDAO implements LibraryDAO {
     }
 
     public boolean deleteBook(String title, String authorName) {
-        try (Session session = connector.openSession()) {
+        try (Session session = HibernateUtil.getSession()) {
             Transaction transaction = session.beginTransaction();
             Author author = session.get(Author.class, authorName);
             if (author != null) {
@@ -72,7 +68,7 @@ public class LibraryDatabaseDAO implements LibraryDAO {
     }
 
     public boolean addAuthor(String authorName) {
-        try (Session session = connector.openSession()) {
+        try (Session session = HibernateUtil.getSession()) {
             Transaction transaction = session.beginTransaction();
             Author author = session.get(Author.class, authorName);
             if (author != null) {
@@ -89,7 +85,7 @@ public class LibraryDatabaseDAO implements LibraryDAO {
     }
 
     public boolean deleteAuthor(String authorName) {
-        try (Session session = connector.openSession()) {
+        try (Session session = HibernateUtil.getSession()) {
             Transaction transaction = session.beginTransaction();
             Author author = session.get(Author.class, authorName);
             if (author != null) {
@@ -100,6 +96,15 @@ public class LibraryDatabaseDAO implements LibraryDAO {
             }
             logger.info(authorName + ": book not found");
             return false;
+        }
+    }
+
+    public int addBooksFromCatalog(File file) {
+        int index = file.getName().lastIndexOf('.');
+        if ("csv".equals(file.getName().substring(index + 1))) {
+            return addBooksFromCSV(file);
+        } else {
+            return addBooksFromJSON(file);
         }
     }
 
@@ -144,7 +149,7 @@ public class LibraryDatabaseDAO implements LibraryDAO {
     }
 
     public void searchBookForTitle(String title) {
-        try (Session session = connector.openSession()) {
+        try (Session session = HibernateUtil.getSession()) {
             Query<Book> query = session.createQuery("FROM Book WHERE Title LIKE :name", Book.class);
             query.setParameter("name", "%" + title + "%");
             List<Book> findBooks = query.getResultList();
@@ -157,7 +162,7 @@ public class LibraryDatabaseDAO implements LibraryDAO {
     }
 
     public void searchBooksForAuthor(String authorName) {
-        try (Session session = connector.openSession()) {
+        try (Session session = HibernateUtil.getSession()) {
             Query<Book> query = session.createQuery("FROM Book WHERE Author_Name LIKE :name", Book.class);
             query.setParameter("name", "%" + authorName + "%");
             List<Book> foundBooks = query.getResultList();
@@ -170,7 +175,7 @@ public class LibraryDatabaseDAO implements LibraryDAO {
     }
 
     public boolean searchBookForISBN(String ISBNumber) {
-        try (Session session = connector.openSession()) {
+        try (Session session = HibernateUtil.getSession()) {
             Query<Book> query = session.createQuery("FROM Book WHERE ISBNumber =:number", Book.class);
             query.setParameter("number", ISBNumber);
             List<Book> foundBook = query.getResultList();
@@ -184,7 +189,7 @@ public class LibraryDatabaseDAO implements LibraryDAO {
     }
 
     public void searchBooksByYearRange(int startYear, int finishYear) {
-        try (Session session = connector.openSession()) {
+        try (Session session = HibernateUtil.getSession()) {
             Query<Book> query = session.createQuery("FROM Book WHERE publicationYear BETWEEN :startYear and :finishYear", Book.class);
             query.setParameter("startYear", startYear);
             query.setParameter("finishYear", finishYear);
@@ -198,7 +203,7 @@ public class LibraryDatabaseDAO implements LibraryDAO {
     }
 
     public void searchBookByYearPagesNumberAndTitle(int year, int pages, String title) {
-        try (Session session = connector.openSession()) {
+        try (Session session = HibernateUtil.getSession()) {
             Query<Book> query = session.createQuery("FROM Book WHERE publicationYear =:year " +
                     "and pagesNumber =:pages and title LIKE :title", Book.class);
             query.setParameter("year", year);
@@ -215,7 +220,7 @@ public class LibraryDatabaseDAO implements LibraryDAO {
 
     public Book findBookByFullTitle(String title) {
         Book book = null;
-        try (Session session = connector.openSession()) {
+        try (Session session = HibernateUtil.getSession()) {
             Query<Book> query = session.createQuery("FROM Book where title =:title", Book.class);
             query.setParameter("title", title);
             List<Book> foundBook = query.getResultList();
@@ -224,9 +229,5 @@ public class LibraryDatabaseDAO implements LibraryDAO {
             }
         }
         return book;
-    }
-
-    public void closeConnection() {
-        connector.closeSessionFactory();
     }
 }

@@ -16,7 +16,7 @@
                 <version>7.8.2</version>
                 <configuration>
                     <url>jdbc:h2:C:\Users\HP\Desktop\Programming\homeLibraryBD\libraryBD</url>
-                    <user>maxim</user>
+                    <visitor>maxim</visitor>
                     <password>222</password>
                 </configuration>
             </plugin>
@@ -67,7 +67,26 @@
             <artifactId>hibernate-core</artifactId>
             <version>5.4.30.Final</version>
         </dependency>
-
+        <dependency>
+            <groupId>jakarta.xml.bind</groupId>
+            <artifactId>jakarta.xml.bind-api</artifactId>
+            <version>3.0.1</version>
+        </dependency>
+        <dependency>
+            <groupId>jakarta.xml.ws</groupId>
+            <artifactId>jakarta.xml.ws-api</artifactId>
+            <version>3.0.1</version>
+        </dependency>
+        <dependency>
+            <groupId>jakarta.jws</groupId>
+            <artifactId>jakarta.jws-api</artifactId>
+            <version>3.0.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.sun.xml.ws</groupId>
+            <artifactId>jaxws-rt</artifactId>
+            <version>3.0.0</version>
+        </dependency>
     </dependencies>
 
     <properties>
