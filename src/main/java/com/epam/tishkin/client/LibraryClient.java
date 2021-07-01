@@ -3,7 +3,7 @@ package com.epam.tishkin.client;
 import com.epam.tishkin.models.Bookmark;
 import com.epam.tishkin.models.User;
 import com.epam.tishkin.ws.*;
-import com.epam.tishkin.ws.impl.HistoryWriter;
+import com.epam.tishkin.ws.impl.HistoryManager;
 import com.epam.tishkin.models.Book;
 import com.epam.tishkin.models.Role;
 import jakarta.xml.ws.BindingProvider;
@@ -20,7 +20,6 @@ import java.time.Year;
 import java.util.*;
 
 public class LibraryClient {
-    private static final Properties properties = new Properties();
     final static Logger logger = LogManager.getLogger(LibraryClient.class);
     private Visitor visitor;
     private Library library;
@@ -192,7 +191,7 @@ public class LibraryClient {
         currentBook = new Book(bookTitle, ISBNumber, publicationYear, pagesNumber);
         if (library.addBook(currentBook, bookAuthor)) {
             logger.info("New book added - " + currentBook);
-            HistoryWriter.write(user.getLogin(), "New book added - " + currentBook);
+            HistoryManager.write(user.getLogin(), "New book added - " + currentBook);
         } else {
             logger.info(bookTitle + ": this book is already in the database");
         }
@@ -343,45 +342,29 @@ public class LibraryClient {
             logger.info(pageNumber + " Invalid page value");
             return;
         }
-        if (!visitor.addBookmark(bookTitle, pageNumber, user.getLogin())) {
+        if (!visitor.addBookmark(bookTitle, pageNumber)) {
             logger.info("The bookmark already exists in this book");
             return;
         }
         logger.info("Bookmark was added to the " + bookTitle + " book on the page " + pageNumber);
-        //writeToHistory(visitor.getUser().getLogin() + ": Bookmark added - book title: " + bookTitle + " page: " + pageNumber);
     }
 
     private void deleteBookmark(BufferedReader reader) throws IOException {
         System.out.println("Enter the book title");
         String bookTitle = reader.readLine();
-        if (!visitor.deleteBookmark(bookTitle, user.getLogin())) {
+        if (!visitor.deleteBookmark(bookTitle)) {
             logger.info("There is no bookmark in this book: " + bookTitle);
             return;
         }
         logger.info("Bookmark deleted - book title: " + bookTitle);
-        //writeToHistory(visitor.getUser().getLogin() + ": Bookmark deleted - book title: " + bookTitle);
     }
 
     private void showBooksWithBookmarks() {
-        List<Bookmark> foundBookmarks = visitor.showBooksWithBookmarks(user.getLogin());
+        List<Bookmark> foundBookmarks = visitor.showBooksWithBookmarks();
         if (foundBookmarks.isEmpty()) {
             logger.info("There are no bookmarks");
         }
         foundBookmarks.forEach(logger::info);
-        //writeToHistory(visitor.getUser().getLogin() + ": Show books with visitor's bookmark");
-    }
-
-    private static void writeToHistory (String message){
-        try (FileReader readerForProperties = new FileReader("src/main/resources/config.properties")) {
-            properties.load(readerForProperties);
-        } catch (IOException e) {
-            logger.error(e.getMessage());
-        }
-        try (FileWriter writer = new FileWriter(properties.getProperty("pathFromHistory"), true)) {
-            writer.write(message + "\n");
-        } catch (IOException e) {
-            logger.error(e.getMessage());
-       }
     }
 
     private boolean isISBNumberCorrect(String number) {
@@ -468,6 +451,7 @@ public class LibraryClient {
     }
 
     private void showHistory() {
-        visitor.showHistory();
+        List<String> fullHistory = visitor.showHistory();
+        fullHistory.forEach(logger::info);
     }
 }

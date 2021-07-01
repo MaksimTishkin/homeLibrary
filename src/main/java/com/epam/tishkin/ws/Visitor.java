@@ -14,8 +14,8 @@ public interface Visitor {
     @WebMethod User userAuthorization();
     @WebMethod boolean addUser(String login, String password);
     @WebMethod boolean blockUser(String login);
-    @WebMethod void showHistory();
-    @WebMethod boolean addBookmark(String bookTitle, int pageNumber, String login);
-    @WebMethod boolean deleteBookmark(String bookTitle, String login);
-    @WebMethod List<Bookmark> showBooksWithBookmarks(String login);
+    @WebMethod List<String> showHistory();
+    @WebMethod boolean addBookmark(String bookTitle, int pageNumber);
+    @WebMethod boolean deleteBookmark(String bookTitle);
+    @WebMethod List<Bookmark> showBooksWithBookmarks();
 }

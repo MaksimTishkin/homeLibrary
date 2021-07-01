@@ -1,8 +1,6 @@
 package com.epam.tishkin.ws.impl;
 
-import com.epam.tishkin.models.Book;
 import com.epam.tishkin.models.User;
-import com.epam.tishkin.ws.Library;
 import com.epam.tishkin.ws.Visitor;
 import com.epam.tishkin.models.Bookmark;
 import com.epam.tishkin.models.Role;
@@ -75,7 +73,7 @@ public class VisitorImpl implements Visitor {
             visitor = new User(login, password, Role.VISITOR);
             session.save(visitor);
             transaction.commit();
-            HistoryWriter.write(getLogin(), "New user added - " + login);
+            HistoryManager.write(getLogin(), "New user added - " + login);
             return true;
         }
     }
@@ -90,28 +88,17 @@ public class VisitorImpl implements Visitor {
             }
             session.delete(visitor);
             transaction.commit();
-            logger.info("User deleted - " + visitor.getLogin());
+            HistoryManager.write(getLogin(), "User deleted - " + login);
             return true;
         }
     }
 
-    public void showHistory() {
-        try (FileReader readerForProperties = new FileReader("src/main/resources/config.properties")) {
-            properties.load(readerForProperties);
-        } catch (IOException e) {
-            logger.error(e.getMessage());
-        }
-        try (BufferedReader reader = new BufferedReader(new FileReader(properties.getProperty("pathFromHistory")))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                System.out.println(line);
-            }
-        } catch (IOException e) {
-            logger.error(e.getMessage());
-        }
+    public List<String> showHistory() {
+        return HistoryManager.read();
     }
 
-    public boolean addBookmark(String bookTitle, int pageNumber, String currentLogin) {
+    public boolean addBookmark(String bookTitle, int pageNumber) {
+        String currentLogin = getLogin();
         Bookmark currentBookmark = new Bookmark(bookTitle, pageNumber, currentLogin);
         try (Session session = HibernateUtil.getSession()) {
             Transaction transaction = session.beginTransaction();
@@ -128,16 +115,18 @@ public class VisitorImpl implements Visitor {
             }
             session.save(currentBookmark);
             transaction.commit();
-            logger.info("Bookmark was added to the " + bookTitle + " book on the page " + pageNumber);
+            HistoryManager.write(getLogin(), "Bookmark was added to the "
+                    + bookTitle + " book on the page " + pageNumber);
             return true;
         }
     }
 
-    public boolean deleteBookmark(String bookTitle, String currentLogin) {
+    public boolean deleteBookmark(String bookTitle) {
+        String userLogin = getLogin();
         try (Session session = HibernateUtil.getSession()) {
             Transaction transaction = session.beginTransaction();
             Query<Bookmark> query = session.createQuery("FROM Bookmark WHERE User_login =: login", Bookmark.class);
-            query.setParameter("login", currentLogin);
+            query.setParameter("login", userLogin);
             List<Bookmark> foundBookmarks = query.getResultList();
             Optional<Bookmark> bookmark = foundBookmarks
                     .stream()
@@ -146,18 +135,18 @@ public class VisitorImpl implements Visitor {
             if (bookmark.isPresent()) {
                 session.delete(bookmark.get());
                 transaction.commit();
-                logger.info("Bookmark deleted - book title: " + bookTitle);
+                HistoryManager.write(getLogin(), "Bookmark deleted - book title: " + bookTitle);
                 return true;
             }
-            logger.info("There is no bookmark in this book: " + bookTitle);
             return false;
         }
     }
 
-    public List<Bookmark> showBooksWithBookmarks(String currentLogin) {
+    public List<Bookmark> showBooksWithBookmarks() {
+        String userLogin = getLogin();
         try (Session session = HibernateUtil.getSession()) {
             Query<Bookmark> query = session.createQuery("FROM Bookmark WHERE User_login =: login", Bookmark.class);
-            query.setParameter("login", currentLogin);
+            query.setParameter("login", userLogin);
             return query.getResultList();
         }
     }
