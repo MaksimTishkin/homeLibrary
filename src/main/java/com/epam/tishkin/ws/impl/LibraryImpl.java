@@ -171,7 +171,7 @@ public class LibraryImpl implements Library {
         try (Session session = HibernateUtil.getSession()) {
             Query<Book> query = session.createQuery("FROM Book WHERE ISBNumber =:number", Book.class);
             query.setParameter("number", ISBNumber);
-            List <Book> foundBook = query.getResultList();
+            List<Book> foundBook = query.getResultList();
             if (!foundBook.isEmpty()) {
                 book = foundBook.get(0);
             }

@@ -152,7 +152,6 @@ public class LibraryClient {
             }
         }
 
-
     private void addNewBook(BufferedReader reader) throws IOException {
         Integer publicationYear;
         String ISBNumber;
@@ -241,7 +240,7 @@ public class LibraryClient {
         } else {
             logger.info("Incorrect file's type");
         }
-        //writeToHistory(user.getLogin() + ": number of books added from CSV catalog: " + booksAdded);
+
     }
 
     private boolean isFileExtensionCorrect(String path) {
@@ -332,10 +331,6 @@ public class LibraryClient {
     private void addBookmark(BufferedReader reader) throws IOException {
         System.out.println("Enter the book title");
         String bookTitle = reader.readLine();
-        if (isBookmarkAlreadyExist(bookTitle)) {
-            logger.info("There is already a bookmark in this book");
-            return;
-        }
         Book book = library.findBookByFullTitle(bookTitle);
         if (book == null) {
             logger.info(bookTitle + " book not found");
@@ -344,31 +339,35 @@ public class LibraryClient {
         System.out.println("Enter the page number");
         String page = reader.readLine();
         Integer pageNumber = checkNumberOfPages(page);
-        if (pageNumber == null || pageNumber > book.getPagesNumber()) {
+        if (pageNumber == null || pageNumber >= book.getPagesNumber()) {
             logger.info(pageNumber + " Invalid page value");
             return;
         }
-        visitor.addBookmark(bookTitle, pageNumber, user.getLogin());
+        if (!visitor.addBookmark(bookTitle, pageNumber, user.getLogin())) {
+            logger.info("The bookmark already exists in this book");
+            return;
+        }
+        logger.info("Bookmark was added to the " + bookTitle + " book on the page " + pageNumber);
         //writeToHistory(visitor.getUser().getLogin() + ": Bookmark added - book title: " + bookTitle + " page: " + pageNumber);
-    }
-
-    private boolean isBookmarkAlreadyExist(String bookTitle) {
-        Optional<Bookmark> bookmark = user.getBookmarks().stream()
-                .filter(b -> bookTitle.equals(b.getTitle()))
-                .findFirst();
-        return bookmark.isPresent();
     }
 
     private void deleteBookmark(BufferedReader reader) throws IOException {
         System.out.println("Enter the book title");
         String bookTitle = reader.readLine();
-        if (visitor.deleteBookmark(bookTitle, user.getLogin())) {
-            //writeToHistory(visitor.getUser().getLogin() + ": Bookmark deleted - book title: " + bookTitle);
+        if (!visitor.deleteBookmark(bookTitle, user.getLogin())) {
+            logger.info("There is no bookmark in this book: " + bookTitle);
+            return;
         }
+        logger.info("Bookmark deleted - book title: " + bookTitle);
+        //writeToHistory(visitor.getUser().getLogin() + ": Bookmark deleted - book title: " + bookTitle);
     }
 
     private void showBooksWithBookmarks() {
-        visitor.showBooksWithBookmarks(user.getLogin());
+        List<Bookmark> foundBookmarks = visitor.showBooksWithBookmarks(user.getLogin());
+        if (foundBookmarks.isEmpty()) {
+            logger.info("There are no bookmarks");
+        }
+        foundBookmarks.forEach(logger::info);
         //writeToHistory(visitor.getUser().getLogin() + ": Show books with visitor's bookmark");
     }
 
@@ -451,13 +450,21 @@ public class LibraryClient {
         String login = reader.readLine();
         System.out.println("Enter user password");
         String password = reader.readLine();
-        visitor.addUser(login, password);
+        if (!visitor.addUser(login, password)) {
+            logger.info("This user already exists - " + login);
+            return;
+        }
+        logger.info("New user added - " + login);
     }
 
     private void blockUser(BufferedReader reader) throws IOException {
         System.out.println("Enter user login");
         String login = reader.readLine();
-        visitor.blockUser(login);
+        if(!visitor.blockUser(login)) {
+            logger.info("User does not exist - " + login);
+            return;
+        }
+        logger.info("User deleted - " + login);
     }
 
     private void showHistory() {
