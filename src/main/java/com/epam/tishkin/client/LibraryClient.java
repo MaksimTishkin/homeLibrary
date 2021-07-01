@@ -31,12 +31,16 @@ public class LibraryClient {
     }
 
     private void run() {
-        libraryConnection();
-        visitorConnection();
-        while((user = authorization()) == null) {
-            logger.info("Incorrect login/password");
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(System.in))) {
+            libraryConnection();
+            visitorConnection();
+            while ((user = authorization(reader)) == null) {
+                logger.info("Incorrect login/password");
+            }
+            startLibraryUse(reader);
+        } catch (IOException e) {
+            logger.error(e.getMessage());
         }
-        startLibraryUse();
     }
 
     private void visitorConnection() {
@@ -63,99 +67,91 @@ public class LibraryClient {
         library = service.getPort(Library.class);
     }
 
-    private User authorization() {
+    private User authorization(BufferedReader reader) throws IOException {
         String WS_URL = "http://localhost:9999/ws/user?wsdl";
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(System.in))) {
-            System.out.println("Enter your login");
-            String login = reader.readLine();
-            System.out.println("Enter your password");
-            String password = reader.readLine();
-            Map<String, Object> req_ctx = ((BindingProvider)visitor).getRequestContext();
-            req_ctx.put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, WS_URL);
+        System.out.println("Enter your login");
+        String login = reader.readLine();
+        System.out.println("Enter your password");
+        String password = reader.readLine();
+        Map<String, Object> req_ctx = ((BindingProvider)visitor).getRequestContext();
+        req_ctx.put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, WS_URL);
 
-            Map<String, List<String>> headers = new HashMap<>();
-            headers.put("Username", Collections.singletonList(login));
-            headers.put("Password", Collections.singletonList(password));
-            req_ctx.put(MessageContext.HTTP_REQUEST_HEADERS, headers);
-        } catch (IOException e) {
-            logger.error(e.getMessage());
-        }
+        Map<String, List<String>> headers = new HashMap<>();
+        headers.put("Username", Collections.singletonList(login));
+        headers.put("Password", Collections.singletonList(password));
+        req_ctx.put(MessageContext.HTTP_REQUEST_HEADERS, headers);
         return visitor.userAuthorization();
     }
 
-    public void startLibraryUse() {
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(System.in))) {
-            while(true) {
-                System.out.println("1 Add a new book");
-                System.out.println("2 Delete book");
-                System.out.println("3 Add a new author");
-                System.out.println("4 Delete author");
-                System.out.println("5 Add books from CSV or JSON catalog");
-                System.out.println("6 Find a book by title");
-                System.out.println("7 Add a bookmark to a book");
-                System.out.println("8 Delete a bookmark from a book");
-                System.out.println("9 Find books by author");
-                System.out.println("10 Find book by ISBN number");
-                System.out.println("11 Find books by year range");
-                System.out.println("12 Find a book by year, number of pages, and title");
-                System.out.println("13 Find books with my bookmark");
-                System.out.println("14 Exit");
-                if (user.getRole() == Role.ADMINISTRATOR) {
+    public void startLibraryUse(BufferedReader reader) throws IOException {
+        while(true) {
+            System.out.println("1 Add a new book");
+            System.out.println("2 Delete book");
+            System.out.println("3 Add a new author");
+            System.out.println("4 Delete author");
+            System.out.println("5 Add books from CSV or JSON catalog");
+            System.out.println("6 Find a book by title");
+            System.out.println("7 Add a bookmark to a book");
+            System.out.println("8 Delete a bookmark from a book");
+            System.out.println("9 Find books by author");
+            System.out.println("10 Find book by ISBN number");
+            System.out.println("11 Find books by year range");
+            System.out.println("12 Find a book by year, number of pages, and title");
+            System.out.println("13 Find books with my bookmark");
+            System.out.println("14 Exit");
+            if (user.getRole() == Role.ADMINISTRATOR) {
                     System.out.println("15 Settings (for administrators only)");
-                }
-                String request = reader.readLine();
-                switch (request) {
-                    case "1":
-                        addNewBook(reader);
-                        break;
-                    case "2":
-                        deleteBook(reader);
-                        break;
-                    case "3":
-                        addAuthor(reader);
-                        break;
-                    case "4":
-                        deleteAuthor(reader);
-                        break;
-                    case "5":
-                        addBooksFromCatalog(reader);
-                        break;
-                    case "6":
-                        searchBookForTitle(reader);
-                        break;
-                    case "7":
-                        addBookmark(reader);
-                        break;
-                    case "8":
-                        deleteBookmark(reader);
-                        break;
-                    case "9":
-                        searchBooksForAuthor(reader);
-                        break;
-                    case "10":
-                        searchBookForISBNumber(reader);
-                        break;
-                    case "11":
-                        searchBooksForYearRange(reader);
-                        break;
-                    case "12":
-                        searchBookByYearPagesNumberAndTitle(reader);
-                        break;
-                    case "13":
-                        showBooksWithBookmarks();
-                        break;
-                    case "14":
-                        return;
-                    case "15":
-                        useAdditionalAdministratorFeatures(reader);
-                        break;
+            }
+            String request = reader.readLine();
+            switch (request) {
+                case "1":
+                    addNewBook(reader);
+                    break;
+                case "2":
+                    deleteBook(reader);
+                    break;
+                case "3":
+                    addAuthor(reader);
+                    break;
+                case "4":
+                    deleteAuthor(reader);
+                    break;
+                case "5":
+                    addBooksFromCatalog(reader);
+                    break;
+                case "6":
+                    searchBookForTitle(reader);
+                    break;
+                case "7":
+                    addBookmark(reader);
+                    break;
+                case "8":
+                    deleteBookmark(reader);
+                    break;
+                case "9":
+                    searchBooksForAuthor(reader);
+                    break;
+                case "10":
+                    searchBookForISBNumber(reader);
+                    break;
+                case "11":
+                    searchBooksForYearRange(reader);
+                    break;
+                case "12":
+                    searchBookByYearPagesNumberAndTitle(reader);
+                    break;
+                case "13":
+                    showBooksWithBookmarks();
+                    break;
+                case "14":
+                    return;
+                case "15":
+                    useAdditionalAdministratorFeatures(reader);
+                    break;
                 }
             }
         }
-        catch (IOException e) {
-            logger.error(e.getMessage());
-        }
-    }
+
 
     private void addNewBook(BufferedReader reader) throws IOException {
         Integer publicationYear;

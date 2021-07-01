@@ -1,5 +1,7 @@
 package com.epam.tishkin.models;
 
+import jakarta.xml.bind.annotation.XmlElement;
+
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -19,7 +21,6 @@ public class Author {
         this.name = name;
         books = new ArrayList<>();
     }
-
     public String getName() {
         return name;
     }

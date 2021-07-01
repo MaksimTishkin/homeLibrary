@@ -1,21 +1,32 @@
 package com.epam.tishkin.models;
 
+import jakarta.xml.bind.annotation.*;
+
 import javax.persistence.*;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
 @Table (name = "User")
-public class User {
+@XmlAccessorType(XmlAccessType.FIELD)
+@XmlRootElement()
+public class User implements Serializable {
+    private final static long serialVersionUID = 65896589L;
     @Id
     @Column (name = "Login")
+    @XmlElement()
     private String login;
     @Column (name = "Password")
+    @XmlElement()
     private String password;
     @Column (name = "Role")
     @Enumerated(EnumType.STRING)
     private Role role;
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @XmlElementWrapper(name = "bookmarks")
+    @XmlElement(name = "bookmark", type = Bookmark.class)
+    //@XmlTransient
     private List<Bookmark> bookmarks;
 
     public User() {
@@ -28,6 +39,7 @@ public class User {
         this.role = role;
         bookmarks = new ArrayList<>();
     }
+
 
     public String getLogin() {
         return login;

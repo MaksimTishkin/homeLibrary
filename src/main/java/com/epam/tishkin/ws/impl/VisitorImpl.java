@@ -47,6 +47,7 @@ public class VisitorImpl implements Visitor {
             if (user != null) {
                 if (user.getPassword().equals(password)) {
                     logger.info(login + " is connected");
+                    logger.info(user);
                     return user;
                 }
             }
