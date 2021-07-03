@@ -45,6 +45,7 @@ public class LibraryVisitorImpl implements LibraryVisitor {
             User user = session.get(User.class, login);
             if (user != null) {
                 if (user.getPassword().equals(password)) {
+                    HistoryManager.write(login, " is connected");
                     return user.getRole();
                 }
             }
@@ -57,7 +58,6 @@ public class LibraryVisitorImpl implements LibraryVisitor {
             Transaction transaction = session.beginTransaction();
             User visitor = session.get(User.class, login);
             if (visitor != null) {
-                logger.info("This user already exists - " + visitor.getLogin());
                 return false;
             }
             visitor = new User(login, password, Role.VISITOR);
@@ -73,7 +73,6 @@ public class LibraryVisitorImpl implements LibraryVisitor {
             Transaction transaction = session.beginTransaction();
             User visitor = session.get(User.class, login);
             if (visitor == null) {
-                logger.info("User does not exist - " + login);
                 return false;
             }
             session.delete(visitor);
@@ -96,7 +95,6 @@ public class LibraryVisitorImpl implements LibraryVisitor {
                     .filter(b -> bookTitle.equals(b.getTitle()))
                     .findFirst();
             if (bookmark.isPresent()) {
-                logger.info("The bookmark already exists in this book");
                 return false;
             }
             session.save(currentBookmark);

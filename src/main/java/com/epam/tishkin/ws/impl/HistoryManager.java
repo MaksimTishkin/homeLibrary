@@ -25,7 +25,7 @@ public class HistoryManager {
 
     public static synchronized void write(String login, String message) {
         try (FileWriter fileWriter = new FileWriter(properties.getProperty("pathFromHistory"), true)) {
-            fileWriter.write(login + "- " + message + "\r\n");
+            fileWriter.write(login + " - " + message + "\r\n");
         } catch (IOException e) {
             e.printStackTrace();
         }
