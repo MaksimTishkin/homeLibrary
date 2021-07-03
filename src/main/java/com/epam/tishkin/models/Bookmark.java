@@ -21,7 +21,7 @@ public class Bookmark implements Serializable {
     @Column(name = "Page_number")
     @XmlElement()
     private int page;
-    @JoinColumn(name = "User_login")
+    @Column(name = "User_login")
     @XmlElement()
     private String user;
 
@@ -66,6 +66,6 @@ public class Bookmark implements Serializable {
 
     @Override
     public String toString() {
-        return "Book title: " + title + " page with bookmark: " + page;
+        return "Book title: " + title + ", page with bookmark: " + page;
     }
 }

@@ -1,9 +1,7 @@
 package com.epam.tishkin.ws.impl;
 
-import com.epam.tishkin.models.BooksList;
-import com.epam.tishkin.ws.Library;
-import com.epam.tishkin.models.Author;
-import com.epam.tishkin.models.Book;
+import com.epam.tishkin.models.*;
+import com.epam.tishkin.ws.LibraryVisitor;
 import com.google.gson.Gson;
 import jakarta.annotation.Resource;
 import jakarta.jws.WebService;
@@ -19,14 +17,129 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
-@WebService(endpointInterface = "com.epam.tishkin.ws.Library")
-public class LibraryImpl implements Library {
-    final static Logger logger = LogManager.getLogger(LibraryImpl.class);
+@WebService(endpointInterface = "com.epam.tishkin.ws.LibraryVisitor")
+public class LibraryVisitorImpl implements LibraryVisitor {
+    final static Logger logger = LogManager.getLogger(LibraryVisitorImpl.class);
 
     @Resource
     WebServiceContext webServiceContext;
+
+    public Role userAuthorization() {
+        MessageContext messageContext = webServiceContext.getMessageContext();
+        Map<?, ?> http_headers = (Map<?, ?>) messageContext.get(MessageContext.HTTP_REQUEST_HEADERS);
+        List<?> userList = (List<?>) http_headers.get("Username");
+        List<?> passList = (List<?>) http_headers.get("Password");
+        String login = "";
+        String password = "";
+        if(userList != null) {
+            login = userList.get(0).toString();
+        }
+        if(passList != null) {
+            password = passList.get(0).toString();
+        }
+        try (Session session = HibernateUtil.getSession()) {
+            User user = session.get(User.class, login);
+            if (user != null) {
+                if (user.getPassword().equals(password)) {
+                    return user.getRole();
+                }
+            }
+        }
+        return null;
+    }
+
+    public boolean addUser(String login, String password) {
+        try (Session session = HibernateUtil.getSession()) {
+            Transaction transaction = session.beginTransaction();
+            User visitor = session.get(User.class, login);
+            if (visitor != null) {
+                logger.info("This user already exists - " + visitor.getLogin());
+                return false;
+            }
+            visitor = new User(login, password, Role.VISITOR);
+            session.save(visitor);
+            transaction.commit();
+            HistoryManager.write(getLogin(), "New user added - " + login);
+            return true;
+        }
+    }
+
+    public boolean blockUser(String login) {
+        try (Session session = HibernateUtil.getSession()) {
+            Transaction transaction = session.beginTransaction();
+            User visitor = session.get(User.class, login);
+            if (visitor == null) {
+                logger.info("User does not exist - " + login);
+                return false;
+            }
+            session.delete(visitor);
+            transaction.commit();
+            HistoryManager.write(getLogin(), "User deleted - " + login);
+            return true;
+        }
+    }
+
+    public boolean addBookmark(String bookTitle, int pageNumber) {
+        String currentLogin = getLogin();
+        Bookmark currentBookmark = new Bookmark(bookTitle, pageNumber, currentLogin);
+        try (Session session = HibernateUtil.getSession()) {
+            Transaction transaction = session.beginTransaction();
+            Query<Bookmark> query = session.createQuery("FROM Bookmark WHERE User_login =: login", Bookmark.class);
+            query.setParameter("login", currentLogin);
+            List<Bookmark> foundBookmarks = query.getResultList();
+            Optional<Bookmark> bookmark = foundBookmarks
+                    .stream()
+                    .filter(b -> bookTitle.equals(b.getTitle()))
+                    .findFirst();
+            if (bookmark.isPresent()) {
+                logger.info("The bookmark already exists in this book");
+                return false;
+            }
+            session.save(currentBookmark);
+            transaction.commit();
+            HistoryManager.write(getLogin(), "Bookmark was added to the "
+                    + bookTitle + " book on the page " + pageNumber);
+            return true;
+        }
+    }
+
+    public boolean deleteBookmark(String bookTitle) {
+        String userLogin = getLogin();
+        try (Session session = HibernateUtil.getSession()) {
+            Transaction transaction = session.beginTransaction();
+            Query<Bookmark> query = session.createQuery("FROM Bookmark WHERE User_login =: login", Bookmark.class);
+            query.setParameter("login", userLogin);
+            List<Bookmark> foundBookmarks = query.getResultList();
+            Optional<Bookmark> bookmark = foundBookmarks
+                    .stream()
+                    .filter(b -> bookTitle.equals(b.getTitle()))
+                    .findFirst();
+            if (bookmark.isPresent()) {
+                session.delete(bookmark.get());
+                transaction.commit();
+                HistoryManager.write(getLogin(), "Bookmark deleted - book title: " + bookTitle);
+                return true;
+            }
+            return false;
+        }
+    }
+
+    public List<Bookmark> showBooksWithBookmarks() {
+        String userLogin = getLogin();
+        try (Session session = HibernateUtil.getSession()) {
+            Query<Bookmark> query = session.createQuery("FROM Bookmark WHERE User_login =: login", Bookmark.class);
+            query.setParameter("login", userLogin);
+            return query.getResultList();
+        }
+    }
+
+    public List<String> showHistory() {
+        return HistoryManager.read();
+    }
 
     public boolean addBook(String title, String ISBNumber, int year, int pages, String bookAuthor) {
         try (Session session = HibernateUtil.getSession()) {
