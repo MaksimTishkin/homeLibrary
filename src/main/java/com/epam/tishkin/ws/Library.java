@@ -11,7 +11,7 @@ import java.util.List;
 @WebService
 @SOAPBinding(style = SOAPBinding.Style.DOCUMENT, use = SOAPBinding.Use.LITERAL)
 public interface Library {
-    @WebMethod boolean addBook(Book book, String authorName);
+    @WebMethod boolean addBook(String title, String ISBNumber, int year, int pages, String author);
     @WebMethod boolean deleteBook(String title, String authorName);
     @WebMethod boolean addAuthor(String authorName);
     @WebMethod boolean deleteAuthor(String authorName);

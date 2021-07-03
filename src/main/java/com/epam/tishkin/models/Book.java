@@ -1,33 +1,45 @@
 package com.epam.tishkin.models;
 
+import jakarta.xml.bind.annotation.XmlAccessType;
+import jakarta.xml.bind.annotation.XmlAccessorType;
+import jakarta.xml.bind.annotation.XmlElement;
+import jakarta.xml.bind.annotation.XmlRootElement;
+
 import javax.persistence.*;
 
 @Entity
 @Table (name = "Book")
+@XmlAccessorType(XmlAccessType.FIELD)
+@XmlRootElement()
 public class Book {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
     @Column(name = "Title")
+    @XmlElement()
     private String title;
     @Column(name = "ISBNumber")
+    @XmlElement()
     private String ISBNumber;
     @Column(name = "Publication_Year")
+    @XmlElement()
     private int publicationYear;
     @Column(name = "Pages_Number")
+    @XmlElement()
     private int pagesNumber;
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "Author_Name")
-    private Author author;
+    @Column(name = "Author_name")
+    @XmlElement()
+    private String author;
 
     public Book() {
     }
 
-    public Book(String title, String ISBNumber, int year, int pagesNumber) {
+    public Book(String title, String ISBNumber, int year, int pagesNumber, String author) {
         this.title = title;
         this.ISBNumber = ISBNumber;
         this.publicationYear = year;
         this.pagesNumber = pagesNumber;
+        this.author = author;
     }
 
     public int getId(){
@@ -66,11 +78,11 @@ public class Book {
         this.pagesNumber = pagesNumber;
     }
 
-    public Author getAuthor() {
+    public String getAuthor() {
         return author;
     }
 
-    public void setAuthor(Author author) {
+    public void setAuthor(String author) {
         this.author = author;
     }
 

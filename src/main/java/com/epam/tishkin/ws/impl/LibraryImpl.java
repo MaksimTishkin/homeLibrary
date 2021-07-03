@@ -1,11 +1,14 @@
 package com.epam.tishkin.ws.impl;
 
+import com.epam.tishkin.models.BooksList;
 import com.epam.tishkin.ws.Library;
 import com.epam.tishkin.models.Author;
-import com.epam.tishkin.models.AuthorsList;
 import com.epam.tishkin.models.Book;
 import com.google.gson.Gson;
+import jakarta.annotation.Resource;
 import jakarta.jws.WebService;
+import jakarta.xml.ws.WebServiceContext;
+import jakarta.xml.ws.handler.MessageContext;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.hibernate.Session;
@@ -22,50 +25,50 @@ import java.util.*;
 public class LibraryImpl implements Library {
     final static Logger logger = LogManager.getLogger(LibraryImpl.class);
 
-    public boolean addBook(Book book, String authorName) {
+    @Resource
+    WebServiceContext webServiceContext;
+
+    public boolean addBook(String title, String ISBNumber, int year, int pages, String bookAuthor) {
         try (Session session = HibernateUtil.getSession()) {
             Transaction transaction = session.beginTransaction();
-            Author author = session.get(Author.class, authorName);
+            Author author = session.get(Author.class, bookAuthor);
             if (author == null) {
-                author = new Author(authorName);
-            }
-            Optional<Book> currentBook = author.getBooks()
-                    .stream()
-                    .filter(b -> book.getTitle().equals(b.getTitle()))
-                    .findFirst();
-            if (currentBook.isPresent()) {
-                logger.info(book.getTitle() + ": this book is already in the database");
-                return false;
-            } else {
-                author.addBook(book);
+                author = new Author(bookAuthor);
                 session.save(author);
-                transaction.commit();
-                logger.info(book.getTitle() + ": book added");
-                return true;
+            } else {
+                Query<Book> query = session.createQuery("FROM Book WHERE Author_Name =: author", Book.class);
+                query.setParameter("author", bookAuthor);
+                Optional<Book> currentBook = query.getResultList()
+                        .stream()
+                        .filter(b -> title.equals(b.getTitle()))
+                        .findFirst();
+                if (currentBook.isPresent()) {
+                    return false;
+                }
             }
+            Book book = new Book(title, ISBNumber, year, pages, bookAuthor);
+            session.save(book);
+            transaction.commit();
+            HistoryManager.write(getLogin(), "Book added - " + title);
+            return true;
         }
     }
 
     public boolean deleteBook(String title, String authorName) {
         try (Session session = HibernateUtil.getSession()) {
             Transaction transaction = session.beginTransaction();
-            Author author = session.get(Author.class, authorName);
-            if (author != null) {
-                Optional<Book> currentBook = author.getBooks()
-                        .stream()
-                        .filter(b -> b.getTitle().equals(title))
-                        .findFirst();
-                if (currentBook.isPresent()) {
-                    Book book = currentBook.get();
-                    author.removeBook(book);
-                    session.save(author);
-                    transaction.commit();
-                    logger.info(title + ": book deleted");
-                    return true;
-                }
+            Query<Book> query = session.createQuery("FROM Book WHERE Author_Name =: author and Title =: bookTitle", Book.class);
+            query.setParameter("author", authorName);
+            query.setParameter("bookTitle", title);
+            List<Book> foundBooks = query.getResultList();
+            if (foundBooks.isEmpty()) {
+                return false;
             }
-            logger.info(title + ": book not found");
-            return false;
+            Book book = foundBooks.get(0);
+            session.delete(book);
+            transaction.commit();
+            HistoryManager.write(getLogin(), "Book removed - " + title);
+            return true;
         }
     }
 
@@ -74,15 +77,13 @@ public class LibraryImpl implements Library {
             Transaction transaction = session.beginTransaction();
             Author author = session.get(Author.class, authorName);
             if (author != null) {
-                logger.info(authorName + ": this author is already in the database");
-                return true;
-
+                return false;
             }
             author = new Author(authorName);
             session.save(author);
             transaction.commit();
-            logger.info(authorName + ": author added");
-            return false;
+            HistoryManager.write(getLogin(), "Author added - " + authorName);
+            return true;
         }
     }
 
@@ -90,14 +91,14 @@ public class LibraryImpl implements Library {
         try (Session session = HibernateUtil.getSession()) {
             Transaction transaction = session.beginTransaction();
             Author author = session.get(Author.class, authorName);
-            if (author != null) {
-                session.delete(author);
-                transaction.commit();
-                logger.info(authorName + ": author removed");
-                return true;
+            if (author == null) {
+                return false;
             }
-            logger.info(authorName + ": book not found");
-            return false;
+            session.delete(author);
+            transaction.commit();
+            HistoryManager.write(getLogin(), "Author removed - " + authorName);
+            return true;
+
         }
     }
 
@@ -121,33 +122,33 @@ public class LibraryImpl implements Library {
                 String ISBNumber = bookParameters[2];
                 int year = Integer.parseInt(bookParameters[3]);
                 int pagesNumber = Integer.parseInt(bookParameters[4]);
-                Book book = new Book(title, ISBNumber, year, pagesNumber);
-                if (addBook(book, author)) {
+                if (addBook(title, ISBNumber, year, pagesNumber, author)) {
                     count++;
                 }
             }
         } catch (IOException e) {
             logger.error(e.getMessage());
         }
+        HistoryManager.write(getLogin(), "Books added from CSV catalog - " + count);
         return count;
     }
 
     private int addBooksFromJSON(File file) {
-        int count = 0;
+        final int[] count = {0};
         try (FileReader reader = new FileReader(file)) {
             Gson gson = new Gson();
-            AuthorsList list = gson.fromJson(reader, AuthorsList.class);
-            for (Author author : list.getAuthors()) {
-                for (Book currentBook : author.getBooks()) {
-                    if (addBook(currentBook, author.getName())) {
-                        count++;
-                    }
+            BooksList list = gson.fromJson(reader, BooksList.class);
+            list.getBooks().forEach(b -> {
+                if (addBook(b.getTitle(), b.getISBNumber(), b.getPublicationYear(),
+                        b.getPagesNumber(), b.getAuthor())) {
+                    count[0]++;
                 }
-            }
+            });
         } catch (IOException e) {
             logger.error(e.getMessage());
         }
-        return count;
+        HistoryManager.write(getLogin(), "Books added from JSON catalog - " + count[0]);
+        return count[0];
     }
 
     public List<Book> searchBookForTitle(String title) {
@@ -210,5 +211,12 @@ public class LibraryImpl implements Library {
             }
         }
         return book;
+    }
+
+    private String getLogin() {
+        MessageContext messageContext = webServiceContext.getMessageContext();
+        Map<?, ?> http_headers = (Map<?, ?>) messageContext.get(MessageContext.HTTP_REQUEST_HEADERS);
+        List<?> userList = (List<?>) http_headers.get("Username");
+        return userList.get(0).toString();
     }
 }

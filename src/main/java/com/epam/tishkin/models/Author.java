@@ -1,25 +1,26 @@
 package com.epam.tishkin.models;
 
+import jakarta.xml.bind.annotation.XmlAccessType;
+import jakarta.xml.bind.annotation.XmlAccessorType;
 import jakarta.xml.bind.annotation.XmlElement;
+import jakarta.xml.bind.annotation.XmlRootElement;
 
 import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.List;
 
 @Entity
 @Table (name = "Author")
+@XmlAccessorType(XmlAccessType.FIELD)
+@XmlRootElement()
 public class Author {
     @Id
+    @XmlElement()
     private String name;
-    @OneToMany(mappedBy = "author", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Book> books;
 
     public Author() {
     }
 
     public Author(String name) {
         this.name = name;
-        books = new ArrayList<>();
     }
     public String getName() {
         return name;
@@ -27,23 +28,6 @@ public class Author {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public List<Book> getBooks() {
-        return books;
-    }
-
-    public void setBooks(List<Book> books) {
-        this.books = books;
-    }
-
-    public void addBook(Book book) {
-        book.setAuthor(this);
-        books.add(book);
-    }
-
-    public void removeBook(Book book) {
-        books.remove(book);
     }
 
     @Override

@@ -1,9 +1,7 @@
 package com.epam.tishkin.client;
 
 import com.epam.tishkin.models.Bookmark;
-import com.epam.tishkin.models.User;
 import com.epam.tishkin.ws.*;
-import com.epam.tishkin.ws.impl.HistoryManager;
 import com.epam.tishkin.models.Book;
 import com.epam.tishkin.models.Role;
 import jakarta.xml.ws.BindingProvider;
@@ -23,7 +21,7 @@ public class LibraryClient {
     final static Logger logger = LogManager.getLogger(LibraryClient.class);
     private Visitor visitor;
     private Library library;
-    private User user;
+    private Role role;
 
     public static void main(String[] args) {
         new LibraryClient().run();
@@ -31,9 +29,9 @@ public class LibraryClient {
 
     private void run() {
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(System.in))) {
-            libraryConnection();
             visitorConnection();
-            while ((user = authorization(reader)) == null) {
+            libraryConnection();
+            while ((role = authorization(reader)) == null) {
                 logger.info("Incorrect login/password");
             }
             startLibraryUse(reader);
@@ -66,7 +64,7 @@ public class LibraryClient {
         library = service.getPort(Library.class);
     }
 
-    private User authorization(BufferedReader reader) throws IOException {
+    private Role authorization(BufferedReader reader) throws IOException {
         String WS_URL = "http://localhost:9999/ws/user?wsdl";
         System.out.println("Enter your login");
         String login = reader.readLine();
@@ -98,8 +96,8 @@ public class LibraryClient {
             System.out.println("12 Find a book by year, number of pages, and title");
             System.out.println("13 Find books with my bookmark");
             System.out.println("14 Exit");
-            if (user.getRole() == Role.ADMINISTRATOR) {
-                    System.out.println("15 Settings (for administrators only)");
+            if (role == Role.ADMINISTRATOR) {
+                System.out.println("15 Settings (for administrators only)");
             }
             String request = reader.readLine();
             switch (request) {
@@ -155,7 +153,6 @@ public class LibraryClient {
         Integer publicationYear;
         String ISBNumber;
         Integer pagesNumber;
-        Book currentBook;
         System.out.println("Enter the book title");
         String bookTitle = reader.readLine();
         if (bookTitle.isEmpty()) {
@@ -188,10 +185,8 @@ public class LibraryClient {
             logger.info("Invalid page value: " + number);
             return;
         }
-        currentBook = new Book(bookTitle, ISBNumber, publicationYear, pagesNumber);
-        if (library.addBook(currentBook, bookAuthor)) {
-            logger.info("New book added - " + currentBook);
-            HistoryManager.write(user.getLogin(), "New book added - " + currentBook);
+        if (library.addBook(bookTitle, ISBNumber, publicationYear, pagesNumber, bookAuthor)) {
+            logger.info("New book added - " + bookTitle);
         } else {
             logger.info(bookTitle + ": this book is already in the database");
         }
@@ -322,7 +317,6 @@ public class LibraryClient {
             } else {
                 logger.info(foundBooks);
             }
-            //writeToHistory(visitor.getUser().getLogin() + ": find books by year, pages and title ");
         } catch (NumberFormatException e) {
             logger.info("Incorrect input data");
         }
@@ -408,6 +402,9 @@ public class LibraryClient {
     }
 
     private void useAdditionalAdministratorFeatures(BufferedReader reader) throws IOException {
+        if (role != Role.ADMINISTRATOR) {
+            return;
+        }
         System.out.println("1 Add a new user");
         System.out.println("2 Block user");
         System.out.println("3 Show history");
@@ -429,6 +426,9 @@ public class LibraryClient {
     }
 
     private void addUser(BufferedReader reader) throws IOException {
+        if (role != Role.ADMINISTRATOR) {
+            return;
+        }
         System.out.println("Enter user login");
         String login = reader.readLine();
         System.out.println("Enter user password");
@@ -441,6 +441,9 @@ public class LibraryClient {
     }
 
     private void blockUser(BufferedReader reader) throws IOException {
+        if (role != Role.ADMINISTRATOR) {
+            return;
+        }
         System.out.println("Enter user login");
         String login = reader.readLine();
         if(!visitor.blockUser(login)) {
@@ -451,6 +454,9 @@ public class LibraryClient {
     }
 
     private void showHistory() {
+        if (role != Role.ADMINISTRATOR) {
+            return;
+        }
         List<String> fullHistory = visitor.showHistory();
         fullHistory.forEach(logger::info);
     }

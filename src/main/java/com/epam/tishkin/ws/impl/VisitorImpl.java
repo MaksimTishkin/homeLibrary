@@ -14,23 +14,18 @@ import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.hibernate.query.Query;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Properties;
 
 @WebService(endpointInterface = "com.epam.tishkin.ws.Visitor")
 public class VisitorImpl implements Visitor {
-    private static final Properties properties = new Properties();
     final static Logger logger = LogManager.getLogger(VisitorImpl.class);
 
     @Resource
     WebServiceContext webServiceContext;
 
-    public User userAuthorization() {
+    public Role userAuthorization() {
         MessageContext messageContext = webServiceContext.getMessageContext();
         Map<?, ?> http_headers = (Map<?, ?>) messageContext.get(MessageContext.HTTP_REQUEST_HEADERS);
         List<?> userList = (List<?>) http_headers.get("Username");
@@ -47,19 +42,11 @@ public class VisitorImpl implements Visitor {
             User user = session.get(User.class, login);
             if (user != null) {
                 if (user.getPassword().equals(password)) {
-                    logger.info(login + " is connected");
-                    return user;
+                    return user.getRole();
                 }
             }
         }
         return null;
-    }
-
-    private String getLogin() {
-        MessageContext messageContext = webServiceContext.getMessageContext();
-        Map<?, ?> http_headers = (Map<?, ?>) messageContext.get(MessageContext.HTTP_REQUEST_HEADERS);
-        List<?> userList = (List<?>) http_headers.get("Username");
-        return userList.get(0).toString();
     }
 
     public boolean addUser(String login, String password) {
@@ -91,10 +78,6 @@ public class VisitorImpl implements Visitor {
             HistoryManager.write(getLogin(), "User deleted - " + login);
             return true;
         }
-    }
-
-    public List<String> showHistory() {
-        return HistoryManager.read();
     }
 
     public boolean addBookmark(String bookTitle, int pageNumber) {
@@ -149,5 +132,16 @@ public class VisitorImpl implements Visitor {
             query.setParameter("login", userLogin);
             return query.getResultList();
         }
+    }
+
+    public List<String> showHistory() {
+        return HistoryManager.read();
+    }
+
+    private String getLogin() {
+        MessageContext messageContext = webServiceContext.getMessageContext();
+        Map<?, ?> http_headers = (Map<?, ?>) messageContext.get(MessageContext.HTTP_REQUEST_HEADERS);
+        List<?> userList = (List<?>) http_headers.get("Username");
+        return userList.get(0).toString();
     }
 }
