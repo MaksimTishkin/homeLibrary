@@ -6,12 +6,15 @@ import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlRootElement;
 
 import javax.persistence.*;
+import java.io.Serializable;
 
 @Entity
 @Table (name = "Author")
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement()
-public class Author {
+public class Author implements Serializable {
+    private static final long serialVersionUID = 785478548L;
+
     @Id
     @XmlElement()
     private String name;

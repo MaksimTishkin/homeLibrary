@@ -6,12 +6,14 @@ import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlRootElement;
 
 import javax.persistence.*;
+import java.io.Serializable;
 
 @Entity
 @Table (name = "Book")
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement()
-public class Book {
+public class Book implements Serializable {
+    private static final long serialVersionUID = 965896523L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
