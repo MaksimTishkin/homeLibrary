@@ -1,4 +1,4 @@
-package com.epam.tishkin.endpoint;
+package com.epam.tishkin.ws.endpoint;
 
 import com.epam.tishkin.ws.impl.LibraryVisitorImpl;
 import jakarta.xml.ws.Endpoint;

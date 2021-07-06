@@ -1,4 +1,4 @@
-package com.epam.tishkin.ws.impl;
+package com.epam.tishkin.dao;
 
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
