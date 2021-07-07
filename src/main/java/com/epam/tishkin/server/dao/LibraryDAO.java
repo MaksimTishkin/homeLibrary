@@ -1,4 +1,4 @@
-package com.epam.tishkin.dao;
+package com.epam.tishkin.server.dao;
 
 import com.epam.tishkin.models.Book;
 import com.epam.tishkin.models.Bookmark;

@@ -1,28 +1,22 @@
-package com.epam.tishkin.ws.impl;
+package com.epam.tishkin.server.ws.impl;
 
-import com.epam.tishkin.dao.HibernateUtil;
-import com.epam.tishkin.dao.HistoryManager;
-import com.epam.tishkin.dao.LibraryDAO;
-import com.epam.tishkin.dao.impl.LibraryDAOImpl;
+import com.epam.tishkin.server.dao.HistoryManager;
+import com.epam.tishkin.server.dao.LibraryDAO;
+import com.epam.tishkin.server.dao.impl.LibraryDAOImpl;
 import com.epam.tishkin.models.*;
-import com.epam.tishkin.ws.LibraryVisitor;
+import com.epam.tishkin.server.ws.LibraryVisitor;
 import jakarta.annotation.Resource;
 import jakarta.jws.WebService;
 import jakarta.xml.ws.WebServiceContext;
 import jakarta.xml.ws.handler.MessageContext;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.hibernate.Session;
-import org.hibernate.query.Query;
 
 import java.io.File;
 import java.util.List;
 import java.util.Map;
 
-@WebService(endpointInterface = "com.epam.tishkin.ws.LibraryVisitor")
+@WebService(endpointInterface = "com.epam.tishkin.server.ws.LibraryVisitor")
 public class LibraryVisitorImpl implements LibraryVisitor {
     private final LibraryDAO libraryDAO = new LibraryDAOImpl();
-    final static Logger logger = LogManager.getLogger(LibraryVisitorImpl.class);
 
     @Resource
     WebServiceContext webServiceContext;

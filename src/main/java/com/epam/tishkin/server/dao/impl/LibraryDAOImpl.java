@@ -1,10 +1,9 @@
-package com.epam.tishkin.dao.impl;
+package com.epam.tishkin.server.dao.impl;
 
-import com.epam.tishkin.dao.HibernateUtil;
-import com.epam.tishkin.dao.HistoryManager;
-import com.epam.tishkin.dao.LibraryDAO;
+import com.epam.tishkin.server.dao.HibernateUtil;
+import com.epam.tishkin.server.dao.HistoryManager;
+import com.epam.tishkin.server.dao.LibraryDAO;
 import com.epam.tishkin.models.*;
-import com.epam.tishkin.ws.impl.LibraryVisitorImpl;
 import com.google.gson.Gson;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

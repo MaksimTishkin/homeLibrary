@@ -1,4 +1,4 @@
-package com.epam.tishkin.dao;
+package com.epam.tishkin.server.dao;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

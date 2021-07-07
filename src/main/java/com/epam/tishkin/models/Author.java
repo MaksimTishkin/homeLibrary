@@ -18,6 +18,8 @@ public class Author implements Serializable {
     @Id
     @XmlElement()
     private String name;
+    //@OneToMany(mappedBy = "author", cascade = CascadeType.ALL, orphanRemoval = true)
+    //private List<Book> books;
 
     public Author() {
     }

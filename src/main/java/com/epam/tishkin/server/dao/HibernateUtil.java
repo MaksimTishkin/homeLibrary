@@ -1,4 +1,4 @@
-package com.epam.tishkin.dao;
+package com.epam.tishkin.server.dao;
 
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;

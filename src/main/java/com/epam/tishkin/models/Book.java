@@ -32,6 +32,9 @@ public class Book implements Serializable {
     @Column(name = "Author_name")
     @XmlElement()
     private String author;
+    //@ManyToOne(fetch = FetchType.LAZY)
+    //@JoinColumn(name = "Author_Name")
+    //private Author author;
 
     public Book() {
     }

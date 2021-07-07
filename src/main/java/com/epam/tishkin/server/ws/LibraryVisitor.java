@@ -1,4 +1,4 @@
-package com.epam.tishkin.ws;
+package com.epam.tishkin.server.ws;
 
 import com.epam.tishkin.models.Book;
 import com.epam.tishkin.models.Bookmark;

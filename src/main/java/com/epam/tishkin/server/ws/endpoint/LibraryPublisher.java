@@ -1,6 +1,6 @@
-package com.epam.tishkin.ws.endpoint;
+package com.epam.tishkin.server.ws.endpoint;
 
-import com.epam.tishkin.ws.impl.LibraryVisitorImpl;
+import com.epam.tishkin.server.ws.impl.LibraryVisitorImpl;
 import jakarta.xml.ws.Endpoint;
 
 public class LibraryPublisher {
