@@ -29,17 +29,14 @@ public class Book implements Serializable {
     @Column(name = "Pages_Number")
     @XmlElement()
     private int pagesNumber;
-    @Column(name = "Author_name")
-    @XmlElement()
-    private String author;
-    //@ManyToOne(fetch = FetchType.LAZY)
-    //@JoinColumn(name = "Author_Name")
-    //private Author author;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "Author_name")
+    private Author author;
 
     public Book() {
     }
 
-    public Book(String title, String ISBNumber, int year, int pagesNumber, String author) {
+    public Book(String title, String ISBNumber, int year, int pagesNumber, Author author) {
         this.title = title;
         this.ISBNumber = ISBNumber;
         this.publicationYear = year;
@@ -83,11 +80,11 @@ public class Book implements Serializable {
         this.pagesNumber = pagesNumber;
     }
 
-    public String getAuthor() {
+    public Author getAuthor() {
         return author;
     }
 
-    public void setAuthor(String author) {
+    public void setAuthor(Author author) {
         this.author = author;
     }
 

@@ -10,5 +10,5 @@ public enum Role {
     @XmlEnumValue("ADMINISTRATOR")
     ADMINISTRATOR,
     @XmlEnumValue("VISITOR")
-    VISITOR;
+    VISITOR
 }

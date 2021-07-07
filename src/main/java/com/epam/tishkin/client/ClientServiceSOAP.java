@@ -21,7 +21,6 @@ public class ClientServiceSOAP {
     String WS_URL = "http://localhost:9999/ws/library?wsdl";
     private LibraryVisitor libraryVisitor;
 
-
     public void connection() {
         URL url = null;
         try {

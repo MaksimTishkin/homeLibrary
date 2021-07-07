@@ -114,7 +114,7 @@ public class LibraryVisitorImpl implements LibraryVisitor {
     }
 
     public int addBooksFromCatalog(File file) {
-        int booksAdded =libraryDAO.addBooksFromCatalog(file);
+        int booksAdded = libraryDAO.addBooksFromCatalog(file);
         HistoryManager.write(getLogin(), "Books added from JSON catalog - " + booksAdded);
         return booksAdded;
     }

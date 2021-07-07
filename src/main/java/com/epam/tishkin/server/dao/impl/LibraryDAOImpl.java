@@ -62,19 +62,17 @@ public class LibraryDAOImpl implements LibraryDAO {
     }
 
     public boolean addBookmark(String login, String bookTitle, int pageNumber) {
-        Bookmark currentBookmark = new Bookmark(bookTitle, pageNumber, login);
         try (Session session = HibernateUtil.getSession()) {
             Transaction transaction = session.beginTransaction();
-            Query<Bookmark> query = session.createQuery("FROM Bookmark WHERE User_login =: login", Bookmark.class);
-            query.setParameter("login", login);
-            List<Bookmark> foundBookmarks = query.getResultList();
-            Optional<Bookmark> bookmark = foundBookmarks
+            User user = session.get(User.class, login);
+            Optional<Bookmark> bookmark = user.getBookmarks()
                     .stream()
                     .filter(b -> bookTitle.equals(b.getTitle()))
                     .findFirst();
             if (bookmark.isPresent()) {
                 return false;
             }
+            Bookmark currentBookmark = new Bookmark(bookTitle, pageNumber, user);
             session.save(currentBookmark);
             transaction.commit();
             return true;
@@ -116,9 +114,7 @@ public class LibraryDAOImpl implements LibraryDAO {
                 author = new Author(bookAuthor);
                 session.save(author);
             } else {
-                Query<Book> query = session.createQuery("FROM Book WHERE Author_Name =: author", Book.class);
-                query.setParameter("author", bookAuthor);
-                Optional<Book> currentBook = query.getResultList()
+                Optional<Book> currentBook = author.getBook()
                         .stream()
                         .filter(b -> title.equals(b.getTitle()))
                         .findFirst();
@@ -126,7 +122,7 @@ public class LibraryDAOImpl implements LibraryDAO {
                     return false;
                 }
             }
-            Book book = new Book(title, ISBNumber, year, pages, bookAuthor);
+            Book book = new Book(title, ISBNumber, year, pages, author);
             session.save(book);
             transaction.commit();
             return true;
@@ -214,7 +210,7 @@ public class LibraryDAOImpl implements LibraryDAO {
             BooksList list = gson.fromJson(reader, BooksList.class);
             list.getBooks().forEach(b -> {
                 if (addBook(b.getTitle(), b.getISBNumber(), b.getPublicationYear(),
-                        b.getPagesNumber(), b.getAuthor())) {
+                        b.getPagesNumber(), b.getAuthor().getName())) {
                     count[0]++;
                 }
             });

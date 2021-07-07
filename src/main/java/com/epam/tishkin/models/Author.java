@@ -7,6 +7,7 @@ import jakarta.xml.bind.annotation.XmlRootElement;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.util.List;
 
 @Entity
 @Table (name = "Author")
@@ -18,8 +19,8 @@ public class Author implements Serializable {
     @Id
     @XmlElement()
     private String name;
-    //@OneToMany(mappedBy = "author", cascade = CascadeType.ALL, orphanRemoval = true)
-    //private List<Book> books;
+    @OneToMany(mappedBy = "author", orphanRemoval = true)
+    private List<Book> book;
 
     public Author() {
     }
@@ -27,12 +28,21 @@ public class Author implements Serializable {
     public Author(String name) {
         this.name = name;
     }
+
     public String getName() {
         return name;
     }
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public List<Book> getBook() {
+        return book;
+    }
+
+    public void setBook(List<Book> book) {
+        this.book = book;
     }
 
     @Override

@@ -21,15 +21,15 @@ public class Bookmark implements Serializable {
     @Column(name = "Page_number")
     @XmlElement()
     private int page;
-    @Column(name = "User_login")
-    @XmlElement()
-    private String user;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "User_login")
+    private User user;
 
     public Bookmark() {
 
     }
 
-    public Bookmark(String title, int page, String user) {
+    public Bookmark(String title, int page, User user) {
         this.title = title;
         this.page = page;
         this.user = user;
@@ -56,11 +56,11 @@ public class Bookmark implements Serializable {
     }
 
 
-    public String getUser() {
+    public User getUser() {
         return user;
     }
 
-    public void setUser(String user) {
+    public void setUser(User user) {
         this.user = user;
     }
 
