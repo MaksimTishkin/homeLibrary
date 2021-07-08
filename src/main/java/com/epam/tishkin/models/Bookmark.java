@@ -1,16 +1,25 @@
 package com.epam.tishkin.models;
 
+import jakarta.xml.bind.annotation.*;
+
 import javax.persistence.*;
+import java.io.Serializable;
 
 @Entity
 @Table(name = "Bookmark")
-public class Bookmark {
+@XmlAccessorType(XmlAccessType.FIELD)
+@XmlRootElement()
+public class Bookmark implements Serializable {
+    private final static long serialVersionUID = 98745874L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @XmlTransient
     private int id;
     @Column(name = "Book_title")
+    @XmlElement()
     private String title;
     @Column(name = "Page_number")
+    @XmlElement()
     private int page;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "User_login")
@@ -20,9 +29,10 @@ public class Bookmark {
 
     }
 
-    public Bookmark(String title, int page) {
+    public Bookmark(String title, int page, User user) {
         this.title = title;
         this.page = page;
+        this.user = user;
     }
 
     public int getId(){
@@ -45,6 +55,7 @@ public class Bookmark {
         this.page = page;
     }
 
+
     public User getUser() {
         return user;
     }
@@ -55,6 +66,6 @@ public class Bookmark {
 
     @Override
     public String toString() {
-        return "Book title: " + title + " page with bookmark: " + page;
+        return "Book title: " + title + ", page with bookmark: " + page;
     }
 }

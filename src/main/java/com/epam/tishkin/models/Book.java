@@ -1,33 +1,47 @@
 package com.epam.tishkin.models;
 
+import jakarta.xml.bind.annotation.XmlAccessType;
+import jakarta.xml.bind.annotation.XmlAccessorType;
+import jakarta.xml.bind.annotation.XmlElement;
+import jakarta.xml.bind.annotation.XmlRootElement;
+
 import javax.persistence.*;
+import java.io.Serializable;
 
 @Entity
 @Table (name = "Book")
-public class Book {
+@XmlAccessorType(XmlAccessType.FIELD)
+@XmlRootElement()
+public class Book implements Serializable {
+    private static final long serialVersionUID = 965896523L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
     @Column(name = "Title")
+    @XmlElement()
     private String title;
     @Column(name = "ISBNumber")
+    @XmlElement()
     private String ISBNumber;
     @Column(name = "Publication_Year")
+    @XmlElement()
     private int publicationYear;
     @Column(name = "Pages_Number")
+    @XmlElement()
     private int pagesNumber;
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "Author_Name")
+    @JoinColumn(name = "Author_name")
     private Author author;
 
     public Book() {
     }
 
-    public Book(String title, String ISBNumber, int year, int pagesNumber) {
+    public Book(String title, String ISBNumber, int year, int pagesNumber, Author author) {
         this.title = title;
         this.ISBNumber = ISBNumber;
         this.publicationYear = year;
         this.pagesNumber = pagesNumber;
+        this.author = author;
     }
 
     public int getId(){
