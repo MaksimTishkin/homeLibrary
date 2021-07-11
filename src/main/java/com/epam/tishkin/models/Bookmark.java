@@ -1,10 +1,12 @@
 package com.epam.tishkin.models;
 
 import javax.persistence.*;
+import java.io.Serializable;
 
 @Entity
 @Table(name = "Bookmark")
-public class Bookmark {
+public class Bookmark implements Serializable {
+    private final static long serialVersionUID = 98745874L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
@@ -20,9 +22,10 @@ public class Bookmark {
 
     }
 
-    public Bookmark(String title, int page) {
+    public Bookmark(String title, int page, User user) {
         this.title = title;
         this.page = page;
+        this.user = user;
     }
 
     public int getId(){
@@ -45,6 +48,7 @@ public class Bookmark {
         this.page = page;
     }
 
+
     public User getUser() {
         return user;
     }
@@ -55,6 +59,6 @@ public class Bookmark {
 
     @Override
     public String toString() {
-        return "Book title: " + title + " page with bookmark: " + page;
+        return "Book title: " + title + ", page with bookmark: " + page;
     }
 }

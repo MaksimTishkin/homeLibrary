@@ -1,10 +1,12 @@
 package com.epam.tishkin.models;
 
 import javax.persistence.*;
+import java.io.Serializable;
 
 @Entity
 @Table (name = "Book")
-public class Book {
+public class Book implements Serializable {
+    private static final long serialVersionUID = 965896523L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
@@ -17,17 +19,18 @@ public class Book {
     @Column(name = "Pages_Number")
     private int pagesNumber;
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "Author_Name")
+    @JoinColumn(name = "Author_name")
     private Author author;
 
     public Book() {
     }
 
-    public Book(String title, String ISBNumber, int year, int pagesNumber) {
+    public Book(String title, String ISBNumber, int year, int pagesNumber, Author author) {
         this.title = title;
         this.ISBNumber = ISBNumber;
         this.publicationYear = year;
         this.pagesNumber = pagesNumber;
+        this.author = author;
     }
 
     public int getId(){

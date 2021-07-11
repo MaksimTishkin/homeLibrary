@@ -1,23 +1,24 @@
 package com.epam.tishkin.models;
 
 import javax.persistence.*;
-import java.util.ArrayList;
+import java.io.Serializable;
 import java.util.List;
 
 @Entity
 @Table (name = "Author")
-public class Author {
+public class Author implements Serializable {
+    private static final long serialVersionUID = 785478548L;
+
     @Id
     private String name;
-    @OneToMany(mappedBy = "author", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Book> books;
+    @OneToMany(mappedBy = "author", orphanRemoval = true)
+    private List<Book> book;
 
     public Author() {
     }
 
     public Author(String name) {
         this.name = name;
-        books = new ArrayList<>();
     }
 
     public String getName() {
@@ -28,21 +29,12 @@ public class Author {
         this.name = name;
     }
 
-    public List<Book> getBooks() {
-        return books;
+    public List<Book> getBook() {
+        return book;
     }
 
-    public void setBooks(List<Book> books) {
-        this.books = books;
-    }
-
-    public void addBook(Book book) {
-        book.setAuthor(this);
-        books.add(book);
-    }
-
-    public void removeBook(Book book) {
-        books.remove(book);
+    public void setBook(List<Book> book) {
+        this.book = book;
     }
 
     @Override
