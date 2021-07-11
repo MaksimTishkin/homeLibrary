@@ -4,10 +4,8 @@ import com.epam.tishkin.models.Book;
 import com.epam.tishkin.server.rs.filter.UserAuth;
 import com.epam.tishkin.server.rs.service.LibraryService;
 import jakarta.inject.Inject;
-import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
-import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.core.Response;
 
 @Path("/books")

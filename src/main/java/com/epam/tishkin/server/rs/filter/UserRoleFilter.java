@@ -10,14 +10,14 @@ import jakarta.ws.rs.ext.Provider;
 
 @Priority(Priorities.AUTHENTICATION)
 @Provider
-@UserAuth
-public class UserAuthFilter implements ContainerRequestFilter {
+@UserRole
+public class UserRoleFilter implements ContainerRequestFilter {
     private static final String AUTHORIZATION_PROPERTY = "token";
     TokenManager tokenManager = new TokenManager();
 
     public void filter(ContainerRequestContext request) {
         String jwt = request.getHeaderString(AUTHORIZATION_PROPERTY);
-        if (jwt.isEmpty() || !tokenManager.verifyToken(jwt)) {
+        if (jwt == null || !tokenManager.getRoleFromJWT(jwt).equals("ADMINISTRATOR")) {
             Response response = Response
                     .status(Response.Status.FORBIDDEN)
                     .build();

@@ -1,6 +1,5 @@
 package com.epam.tishkin.server.rs.resource;
 
-import com.epam.tishkin.models.Role;
 import com.epam.tishkin.models.User;
 import com.epam.tishkin.server.rs.config.TokenManager;
 import com.epam.tishkin.server.rs.service.LibraryService;
@@ -8,7 +7,6 @@ import jakarta.inject.Inject;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.HeaderParam;
 import jakarta.ws.rs.Path;
-import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.core.Response;
 
 @Path("/users")
@@ -33,7 +31,7 @@ public class UserREST {
 
     @GET
     @Path("/role")
-    public Response getRole(@HeaderParam("jwt") String jwt) {
+    public Response getRole(@HeaderParam("token") String jwt) {
         String role = tokenManager.getRoleFromJWT(jwt);
         return Response.status(200).entity(role).build();
     }

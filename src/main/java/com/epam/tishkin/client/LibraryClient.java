@@ -1,6 +1,5 @@
 package com.epam.tishkin.client;
 
-import com.epam.tishkin.models.Role;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -79,7 +78,7 @@ public class LibraryClient {
             logger.info("Invalid page value: " + number);
             return;
         }
-        if (clientServiceREST.addNewBook(bookTitle, ISBNumber, publicationYear, pagesNumber, bookAuthor)) {
+        if (clientServiceREST.addNewBook(bookTitle, ISBNumber, publicationYear, pagesNumber, bookAuthor, jwt)) {
             logger.info("New book added - " + bookTitle);
         } else {
             logger.info(bookTitle + ": this book is already in the database");
