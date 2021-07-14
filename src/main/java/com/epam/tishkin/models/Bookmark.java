@@ -22,6 +22,11 @@ public class Bookmark implements Serializable {
 
     }
 
+    public Bookmark(String title, int page) {
+        this.title = title;
+        this.page = page;
+    }
+
     public Bookmark(String title, int page, User user) {
         this.title = title;
         this.page = page;

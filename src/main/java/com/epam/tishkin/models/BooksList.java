@@ -6,10 +6,16 @@ import java.util.List;
 public class BooksList {
     private List<Book> books;
 
+    public BooksList() {
+        books = new ArrayList<>();
+    }
+
     public List<Book> getBooks() {
-        if (books == null) {
-            books = new ArrayList<>();
-        }
         return books;
     }
+
+    public void setBooks(List<Book> books) {
+        this.books = books;
+    }
+
 }

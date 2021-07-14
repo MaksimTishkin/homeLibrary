@@ -34,15 +34,14 @@ public class LibraryDAOImpl implements LibraryDAO {
         return null;
     }
 
-    public boolean addUser(String login, String password) {
+    public boolean addUser(User user) {
         try (Session session = HibernateUtil.getSession()) {
             Transaction transaction = session.beginTransaction();
-            User visitor = session.get(User.class, login);
+            User visitor = session.get(User.class, user.getLogin());
             if (visitor != null) {
                 return false;
             }
-            visitor = new User(login, password, Role.VISITOR);
-            session.save(visitor);
+            session.save(user);
             transaction.commit();
             return true;
         }
@@ -61,36 +60,33 @@ public class LibraryDAOImpl implements LibraryDAO {
         }
     }
 
-    public boolean addBookmark(String login, String bookTitle, int pageNumber) {
+    public boolean addBookmark(Bookmark newBookmark, String login) {
         try (Session session = HibernateUtil.getSession()) {
             Transaction transaction = session.beginTransaction();
             User user = session.get(User.class, login);
             Optional<Bookmark> bookmark = user.getBookmarks()
                     .stream()
-                    .filter(b -> bookTitle.equals(b.getTitle()))
+                    .filter(b -> newBookmark.getTitle().equals(b.getTitle()))
                     .findFirst();
             if (bookmark.isPresent()) {
                 return false;
             }
-            Bookmark currentBookmark = new Bookmark(bookTitle, pageNumber, user);
-            session.save(currentBookmark);
+            newBookmark.setUser(user);
+            session.save(newBookmark);
             transaction.commit();
             return true;
         }
     }
 
-    public boolean deleteBookmark(String userLogin, String bookTitle) {
+    public boolean deleteBookmark(String bookTitle, String userLogin) {
         try (Session session = HibernateUtil.getSession()) {
             Transaction transaction = session.beginTransaction();
-            Query<Bookmark> query = session.createQuery("FROM Bookmark WHERE User_login =: login", Bookmark.class);
+            Query<Bookmark> query = session.createQuery("FROM Bookmark WHERE User_login =: login and Book_title =: title", Bookmark.class);
             query.setParameter("login", userLogin);
+            query.setParameter("title", bookTitle);
             List<Bookmark> foundBookmarks = query.getResultList();
-            Optional<Bookmark> bookmark = foundBookmarks
-                    .stream()
-                    .filter(b -> bookTitle.equals(b.getTitle()))
-                    .findFirst();
-            if (bookmark.isPresent()) {
-                session.delete(bookmark.get());
+            if (!foundBookmarks.isEmpty()) {
+                session.delete(foundBookmarks.get(0));
                 transaction.commit();
                 return true;
             }
@@ -127,7 +123,7 @@ public class LibraryDAOImpl implements LibraryDAO {
         }
     }
 
-    public boolean deleteBook(String title, String authorName) {
+    public boolean deleteBook(String authorName, String title) {
         try (Session session = HibernateUtil.getSession()) {
             Transaction transaction = session.beginTransaction();
             Query<Book> query = session.createQuery("FROM Book WHERE Author_Name =: author and Title =: bookTitle", Book.class);

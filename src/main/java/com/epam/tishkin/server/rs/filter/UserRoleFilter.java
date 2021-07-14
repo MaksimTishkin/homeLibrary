@@ -16,7 +16,7 @@ public class UserRoleFilter implements ContainerRequestFilter {
     TokenManager tokenManager = new TokenManager();
 
     public void filter(ContainerRequestContext request) {
-        String jwt = request.getHeaderString(AUTHORIZATION_PROPERTY);
+        String jwt = request.getCookies().get(AUTHORIZATION_PROPERTY).getValue();
         if (jwt == null || !tokenManager.getRoleFromJWT(jwt).equals("ADMINISTRATOR")) {
             Response response = Response
                     .status(Response.Status.FORBIDDEN)

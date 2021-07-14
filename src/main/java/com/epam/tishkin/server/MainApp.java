@@ -2,8 +2,10 @@ package com.epam.tishkin.server;
 
 import com.epam.tishkin.server.rs.filter.UserAuthFilter;
 import com.epam.tishkin.server.rs.filter.UserRoleFilter;
+import com.epam.tishkin.server.rs.resource.AuthorREST;
 import com.epam.tishkin.server.rs.resource.BookREST;
 import com.epam.tishkin.server.rs.config.AutoScanFeature;
+import com.epam.tishkin.server.rs.resource.BookmarkREST;
 import com.epam.tishkin.server.rs.resource.UserREST;
 import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
 import org.glassfish.jersey.server.ResourceConfig;
@@ -16,6 +18,8 @@ public class MainApp {
         final ResourceConfig config = new ResourceConfig();
         config.register(BookREST.class);
         config.register(UserREST.class);
+        config.register(AuthorREST.class);
+        config.register(BookmarkREST.class);
         config.register(UserRoleFilter.class);
         config.register(UserAuthFilter.class);
         config.register(AutoScanFeature.class);
