@@ -11,6 +11,7 @@ import com.epam.tishkin.server.rs.service.LibraryService;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Cookie;
+import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.NewCookie;
 import jakarta.ws.rs.core.Response;
 
@@ -46,6 +47,7 @@ public class UserREST {
     @UserAuth
     @GET
     @Path("/show-bookmarks")
+    @Produces(MediaType.APPLICATION_JSON)
     public Response showBooksWithBookmarks(@CookieParam("taken") String jwt) {
         String login = tokenManager.getLoginFromJWT(jwt);
         BookmarksList list = new BookmarksList();
@@ -80,6 +82,7 @@ public class UserREST {
     @UserRole
     @POST
     @Path("/history")
+    @Produces(MediaType.APPLICATION_JSON)
     public Response showHistory() {
         List<String> history = libraryService.showHistory();
         HistoryList list = new HistoryList();

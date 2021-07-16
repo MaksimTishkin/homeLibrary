@@ -6,7 +6,6 @@ import com.epam.tishkin.server.rs.filter.UserAuth;
 import com.epam.tishkin.server.rs.service.LibraryService;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
-import jakarta.ws.rs.core.GenericEntity;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
@@ -45,6 +44,7 @@ public class BookREST {
     @POST
     @Path("/add-from-catalog")
     @Consumes(MediaType.MULTIPART_FORM_DATA)
+    @Produces(MediaType.APPLICATION_JSON)
     public Response addBooksFromCatalog(File file) {
         int booksAdded = libraryService.addBooksFromCatalog(file);
         return Response.status(200).entity(booksAdded).build();
@@ -66,7 +66,7 @@ public class BookREST {
     @UserAuth
     @GET
     @Path("/search-for-author/{bookAuthor}")
-    @Produces
+    @Produces(MediaType.APPLICATION_JSON)
     public Response searchBooksForAuthor(@PathParam("bookAuthor") String authorName) {
         BooksList list = new BooksList();
         List<Book> findBooks = libraryService.searchBooksForAuthor(authorName);
@@ -77,6 +77,7 @@ public class BookREST {
     @UserAuth
     @GET
     @Path("/search-for-isbn/{isbn}")
+    @Produces(MediaType.APPLICATION_JSON)
     public Response searchBookForISBN(@PathParam("isbn") String isbn) {
         Book book = libraryService.searchBookForISBN(isbn);
         return Response.status(200).entity(book).build();
@@ -85,6 +86,7 @@ public class BookREST {
     @UserAuth
     @GET
     @Path("/search-for-years/{startYear}/{finishYear}")
+    @Produces(MediaType.APPLICATION_JSON)
     public Response searchBooksByYearRange(
             @PathParam("initialYear") Integer startYear,
             @PathParam("finalYear") Integer finishYear) {
@@ -97,6 +99,7 @@ public class BookREST {
     @UserAuth
     @GET
     @Path("/search-for-year-pages-title/{year}/{pages}/{title}")
+    @Produces(MediaType.APPLICATION_JSON)
     public Response searchBookByYearPagesNumberAndTitle(
             @PathParam("year") Integer year,
             @PathParam("pages") Integer pages,
@@ -110,6 +113,7 @@ public class BookREST {
     @UserAuth
     @GET
     @Path("/search-by-full-title/{bookTitle}")
+    @Produces(MediaType.APPLICATION_JSON)
     public Response findBookByFullTitle(@PathParam("bookTitle") String bookTitle) {
         Book book = libraryService.findBookByFullTitle(bookTitle);
         return Response.status(200).entity(book).build();
