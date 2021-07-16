@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class BooksList {
+
     private List<Book> books;
 
     public BooksList() {
@@ -17,5 +18,4 @@ public class BooksList {
     public void setBooks(List<Book> books) {
         this.books = books;
     }
-
 }

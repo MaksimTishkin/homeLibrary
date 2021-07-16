@@ -3,10 +3,10 @@ package com.epam.tishkin.client;
 import com.epam.tishkin.client.exception.AccessDeniedException;
 import com.epam.tishkin.models.*;
 import jakarta.ws.rs.client.Client;
+import jakarta.ws.rs.client.ClientBuilder;
 import jakarta.ws.rs.client.Entity;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import org.glassfish.jersey.client.JerseyClientBuilder;
 
 import java.io.File;
 import java.util.List;
@@ -14,7 +14,7 @@ import java.util.List;
 public class ClientServiceREST {
     private static final String REST_URI = "http://localhost:8083/homeLibrary/";
     private static final String AUTHORIZATION_PROPERTY = "token";
-    private final Client client = JerseyClientBuilder.createClient();
+    private final Client client = ClientBuilder.newClient();
 
     public String authorization(String login, String password) {
         Response response = client
@@ -109,7 +109,7 @@ public class ClientServiceREST {
         return response.readEntity(Integer.class);
     }
 
-    public List<Book> searchBookForTitle(String title, String jwt) throws AccessDeniedException {
+    public Book searchBookForTitle(String title, String jwt) throws AccessDeniedException {
         Response response = client
                 .target(REST_URI)
                 .path("books/search-for-title/" + title)
@@ -119,7 +119,10 @@ public class ClientServiceREST {
         if (response.getStatus() == 403) {
             throw new AccessDeniedException("access denied");
         }
-        return response.readEntity(BooksList.class).getBooks();
+        System.out.println(response.getStatus());
+        Book book = response.readEntity(Book.class);
+        System.out.println(book);
+        return book;
     }
 
     public List<Book> searchBooksForAuthor(String bookAuthor, String jwt) throws AccessDeniedException {

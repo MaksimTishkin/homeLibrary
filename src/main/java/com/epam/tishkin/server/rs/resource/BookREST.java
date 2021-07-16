@@ -6,6 +6,7 @@ import com.epam.tishkin.server.rs.filter.UserAuth;
 import com.epam.tishkin.server.rs.service.LibraryService;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.GenericEntity;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
@@ -52,16 +53,20 @@ public class BookREST {
     @UserAuth
     @GET
     @Path("/search-for-title/{title}")
+    @Produces(MediaType.APPLICATION_JSON)
     public Response searchBookForTitle(@PathParam("title") String title) {
-        BooksList list = new BooksList();
-        List<Book> findBooks = libraryService.searchBookForTitle(title);
-        list.setBooks(findBooks);
-        return Response.status(200).entity(list).build();
+        List<Book> books = libraryService.searchBookForTitle(title);
+        Book book = books.get(0);
+        if (book != null) {
+            return Response.ok().entity(book).build();
+        }
+        return Response.status(404).build();
     }
 
     @UserAuth
     @GET
     @Path("/search-for-author/{bookAuthor}")
+    @Produces
     public Response searchBooksForAuthor(@PathParam("bookAuthor") String authorName) {
         BooksList list = new BooksList();
         List<Book> findBooks = libraryService.searchBooksForAuthor(authorName);

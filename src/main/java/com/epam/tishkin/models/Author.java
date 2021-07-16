@@ -1,5 +1,7 @@
 package com.epam.tishkin.models;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.List;
@@ -10,8 +12,10 @@ public class Author implements Serializable {
     private static final long serialVersionUID = 785478548L;
 
     @Id
+    @JsonProperty("name")
     private String name;
     @OneToMany(mappedBy = "author", orphanRemoval = true)
+    @JsonProperty("book")
     private List<Book> book;
 
     public Author() {

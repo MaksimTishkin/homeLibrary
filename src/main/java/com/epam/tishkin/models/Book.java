@@ -1,5 +1,7 @@
 package com.epam.tishkin.models;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import javax.persistence.*;
 import java.io.Serializable;
 
@@ -11,15 +13,20 @@ public class Book implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
     @Column(name = "Title")
+    @JsonProperty("title")
     private String title;
     @Column(name = "ISBNumber")
+    @JsonProperty("ISBNumber")
     private String ISBNumber;
     @Column(name = "Publication_Year")
+    @JsonProperty("publicationYear")
     private int publicationYear;
     @Column(name = "Pages_Number")
+    @JsonProperty("pagesNumber")
     private int pagesNumber;
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "Author_name")
+    @JsonProperty("author")
     private Author author;
 
     public Book() {
