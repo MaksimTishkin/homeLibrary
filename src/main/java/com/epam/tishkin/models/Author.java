@@ -1,6 +1,7 @@
 package com.epam.tishkin.models;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.xml.bind.annotation.XmlElement;
+import jakarta.xml.bind.annotation.XmlRootElement;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -8,14 +9,15 @@ import java.util.List;
 
 @Entity
 @Table (name = "Author")
+@XmlRootElement
 public class Author implements Serializable {
     private static final long serialVersionUID = 785478548L;
 
     @Id
-    @JsonProperty("name")
+    @XmlElement
     private String name;
-    @OneToMany(mappedBy = "author", orphanRemoval = true)
-    @JsonProperty("book")
+    @OneToMany(mappedBy = "author", orphanRemoval = true, fetch = FetchType.EAGER)
+    @XmlElement
     private List<Book> book;
 
     public Author() {

@@ -1,5 +1,6 @@
 package com.epam.tishkin.server.rs.resource;
 
+import com.epam.tishkin.models.Author;
 import com.epam.tishkin.models.Book;
 import com.epam.tishkin.models.BooksList;
 import com.epam.tishkin.server.rs.filter.UserAuth;
@@ -10,6 +11,7 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 
 @Path("/books")
@@ -55,12 +57,10 @@ public class BookREST {
     @Path("/search-for-title/{title}")
     @Produces(MediaType.APPLICATION_JSON)
     public Response searchBookForTitle(@PathParam("title") String title) {
-        List<Book> books = libraryService.searchBookForTitle(title);
-        Book book = books.get(0);
-        if (book != null) {
-            return Response.ok().entity(book).build();
-        }
-        return Response.status(404).build();
+        BooksList booksList = new BooksList();
+        List<Book> foundBooks = libraryService.searchBookForTitle(title);
+        booksList.setBooks(foundBooks);
+        return Response.status(200).entity(booksList).build();
     }
 
     @UserAuth

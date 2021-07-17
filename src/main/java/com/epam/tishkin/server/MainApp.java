@@ -16,13 +16,13 @@ public class MainApp {
 
     public static void main(String[] args) {
         final ResourceConfig config = new ResourceConfig();
+        config.register(AutoScanFeature.class);
         config.register(BookREST.class);
         config.register(UserREST.class);
         config.register(AuthorREST.class);
         config.register(BookmarkREST.class);
         config.register(UserRoleFilter.class);
         config.register(UserAuthFilter.class);
-        config.register(AutoScanFeature.class);
         GrizzlyHttpServerFactory.createHttpServer(URI.create(BASE_URI), config);
     }
 }

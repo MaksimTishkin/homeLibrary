@@ -109,7 +109,7 @@ public class ClientServiceREST {
         return response.readEntity(Integer.class);
     }
 
-    public Book searchBookForTitle(String title, String jwt) throws AccessDeniedException {
+    public List<Book> searchBookForTitle(String title, String jwt) throws AccessDeniedException {
         Response response = client
                 .target(REST_URI)
                 .path("books/search-for-title/" + title)
@@ -119,10 +119,7 @@ public class ClientServiceREST {
         if (response.getStatus() == 403) {
             throw new AccessDeniedException("access denied");
         }
-        System.out.println(response.getStatus());
-        Book book = response.readEntity(Book.class);
-        System.out.println(book);
-        return book;
+        return response.readEntity(BooksList.class).getBooks();
     }
 
     public List<Book> searchBooksForAuthor(String bookAuthor, String jwt) throws AccessDeniedException {

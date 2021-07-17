@@ -232,11 +232,11 @@ public class LibraryClient {
         System.out.println("Enter part of the book title");
         String bookTitle = reader.readLine();
         try {
-            Book foundBooks = clientServiceREST.searchBookForTitle(bookTitle, jwt);
-            if (foundBooks == null) {
+            List<Book> foundBooks = clientServiceREST.searchBookForTitle(bookTitle, jwt);
+            if (foundBooks.isEmpty()) {
                 logger.info("No books found");
             } else {
-               logger.info(foundBooks);
+                foundBooks.forEach(logger::info);
             }
         } catch (AccessDeniedException e) {
             logger.error(e.getMessage());
