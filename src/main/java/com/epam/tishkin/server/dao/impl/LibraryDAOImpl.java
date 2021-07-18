@@ -64,7 +64,9 @@ public class LibraryDAOImpl implements LibraryDAO {
         try (Session session = HibernateUtil.getSession()) {
             Transaction transaction = session.beginTransaction();
             User user = session.get(User.class, login);
-            Optional<Bookmark> bookmark = user.getBookmarks()
+            Query<Bookmark> query = session.createQuery("FROM Bookmark WHERE User_login =: user", Bookmark.class);
+            query.setParameter("user", login);
+            Optional<Bookmark> bookmark = query.getResultList()
                     .stream()
                     .filter(b -> newBookmark.getTitle().equals(b.getTitle()))
                     .findFirst();
@@ -78,11 +80,11 @@ public class LibraryDAOImpl implements LibraryDAO {
         }
     }
 
-    public boolean deleteBookmark(String bookTitle, String userLogin) {
+    public boolean deleteBookmark(String bookTitle, String login) {
         try (Session session = HibernateUtil.getSession()) {
             Transaction transaction = session.beginTransaction();
             Query<Bookmark> query = session.createQuery("FROM Bookmark WHERE User_login =: login and Book_title =: title", Bookmark.class);
-            query.setParameter("login", userLogin);
+            query.setParameter("login", login);
             query.setParameter("title", bookTitle);
             List<Bookmark> foundBookmarks = query.getResultList();
             if (!foundBookmarks.isEmpty()) {
@@ -109,7 +111,9 @@ public class LibraryDAOImpl implements LibraryDAO {
             if (author == null) {
                 session.save(book.getAuthor());
             } else {
-                Optional<Book> currentBook = author.getBook()
+                Query<Book> query = session.createQuery("FROM Book WHERE Author_name =: name", Book.class);
+                query.setParameter("name", book.getAuthor().getName());
+                Optional<Book> currentBook = query.getResultList()
                         .stream()
                         .filter(b -> book.getTitle().equals(b.getTitle()))
                         .findFirst();

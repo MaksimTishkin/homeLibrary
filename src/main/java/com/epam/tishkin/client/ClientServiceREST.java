@@ -85,7 +85,7 @@ public class ClientServiceREST {
     public boolean deleteAuthor(String authorName, String jwt) throws AccessDeniedException {
         Response response = client
                 .target(REST_URI)
-                .path("authors/delete" + authorName)
+                .path("authors/delete/" + authorName)
                 .request(MediaType.TEXT_PLAIN)
                 .cookie(AUTHORIZATION_PROPERTY, jwt)
                 .delete();
@@ -96,16 +96,17 @@ public class ClientServiceREST {
     }
 
     public Integer addBooksFromCatalog(File file, String jwt) throws AccessDeniedException {
+        System.out.println(file);
+        System.out.println(file.getName());
         Response response = client
                 .target(REST_URI)
                 .path("books/add-from-catalog")
-                .request(MediaType.TEXT_PLAIN)
+                .request(MediaType.APPLICATION_JSON)
                 .cookie(AUTHORIZATION_PROPERTY, jwt)
                 .post(Entity.entity(file, MediaType.APPLICATION_OCTET_STREAM));
         if (response.getStatus() == 403) {
             throw new AccessDeniedException("access denied");
         }
-        System.out.println();
         return response.readEntity(Integer.class);
     }
 

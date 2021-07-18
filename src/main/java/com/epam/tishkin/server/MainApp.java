@@ -2,11 +2,11 @@ package com.epam.tishkin.server;
 
 import com.epam.tishkin.server.rs.filter.UserAuthFilter;
 import com.epam.tishkin.server.rs.filter.UserRoleFilter;
-import com.epam.tishkin.server.rs.resource.AuthorREST;
-import com.epam.tishkin.server.rs.resource.BookREST;
+import com.epam.tishkin.server.rs.controller.AuthorREST;
+import com.epam.tishkin.server.rs.controller.BookREST;
 import com.epam.tishkin.server.rs.config.AutoScanFeature;
-import com.epam.tishkin.server.rs.resource.BookmarkREST;
-import com.epam.tishkin.server.rs.resource.UserREST;
+import com.epam.tishkin.server.rs.controller.BookmarkREST;
+import com.epam.tishkin.server.rs.controller.UserREST;
 import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
 import org.glassfish.jersey.server.ResourceConfig;
 import java.net.URI;

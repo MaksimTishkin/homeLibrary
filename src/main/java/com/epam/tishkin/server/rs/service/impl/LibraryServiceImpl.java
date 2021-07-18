@@ -83,7 +83,7 @@ public class LibraryServiceImpl implements LibraryService {
 
     @Override
     public boolean deleteBookmark(String bookTitle, String login) {
-        return libraryDAO.deleteBook(bookTitle, login);
+        return libraryDAO.deleteBookmark(bookTitle, login);
     }
 
     @Override

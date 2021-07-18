@@ -1,4 +1,4 @@
-package com.epam.tishkin.server.rs.resource;
+package com.epam.tishkin.server.rs.controller;
 
 import com.epam.tishkin.models.Bookmark;
 import com.epam.tishkin.models.BookmarksList;
@@ -48,7 +48,7 @@ public class UserREST {
     @GET
     @Path("/show-bookmarks")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response showBooksWithBookmarks(@CookieParam("taken") String jwt) {
+    public Response showBooksWithBookmarks(@CookieParam("token") String jwt) {
         String login = tokenManager.getLoginFromJWT(jwt);
         BookmarksList list = new BookmarksList();
         List<Bookmark> foundBookmarks = libraryService.showBooksWithBookmarks(login);
@@ -69,9 +69,9 @@ public class UserREST {
 
     @UserAuth
     @UserRole
-    @POST
+    @DELETE
     @Path("/delete/{login}")
-    public Response addUser(@PathParam("login") String login) {
+    public Response deleteUser(@PathParam("login") String login) {
         if (libraryService.deleteUser(login)) {
             return Response.status(200).build();
         }
@@ -80,7 +80,7 @@ public class UserREST {
 
     @UserAuth
     @UserRole
-    @POST
+    @GET
     @Path("/history")
     @Produces(MediaType.APPLICATION_JSON)
     public Response showHistory() {

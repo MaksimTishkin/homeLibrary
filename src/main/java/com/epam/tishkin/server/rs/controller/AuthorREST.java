@@ -1,4 +1,4 @@
-package com.epam.tishkin.server.rs.resource;
+package com.epam.tishkin.server.rs.controller;
 
 import com.epam.tishkin.models.Author;
 import com.epam.tishkin.server.rs.filter.UserAuth;

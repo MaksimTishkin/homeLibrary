@@ -23,9 +23,6 @@ public class User implements Serializable {
     @Enumerated(EnumType.STRING)
     @XmlElement
     private Role role;
-    @OneToMany(mappedBy = "user", orphanRemoval = true)
-    @XmlElement
-    private List<Bookmark> bookmarks;
 
     public User() {
 
@@ -60,13 +57,5 @@ public class User implements Serializable {
 
     public void setRole(Role role) {
         this.role = role;
-    }
-
-    public List<Bookmark> getBookmarks() {
-        return bookmarks;
-    }
-
-    public void setBookmarks(List<Bookmark> bookmarks) {
-        this.bookmarks = bookmarks;
     }
 }

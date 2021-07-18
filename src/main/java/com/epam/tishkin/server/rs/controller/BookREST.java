@@ -1,6 +1,5 @@
-package com.epam.tishkin.server.rs.resource;
+package com.epam.tishkin.server.rs.controller;
 
-import com.epam.tishkin.models.Author;
 import com.epam.tishkin.models.Book;
 import com.epam.tishkin.models.BooksList;
 import com.epam.tishkin.server.rs.filter.UserAuth;
@@ -11,7 +10,6 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.List;
 
 @Path("/books")
@@ -48,6 +46,8 @@ public class BookREST {
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @Produces(MediaType.APPLICATION_JSON)
     public Response addBooksFromCatalog(File file) {
+        System.out.println(file);
+        System.out.println(file.getName());
         int booksAdded = libraryService.addBooksFromCatalog(file);
         return Response.status(200).entity(booksAdded).build();
     }
@@ -88,8 +88,8 @@ public class BookREST {
     @Path("/search-for-years/{startYear}/{finishYear}")
     @Produces(MediaType.APPLICATION_JSON)
     public Response searchBooksByYearRange(
-            @PathParam("initialYear") Integer startYear,
-            @PathParam("finalYear") Integer finishYear) {
+            @PathParam("startYear") Integer startYear,
+            @PathParam("finishYear") Integer finishYear) {
         BooksList list = new BooksList();
         List<Book> findBooks = libraryService.searchBooksByYearRange(startYear, finishYear);
         list.setBooks(findBooks);

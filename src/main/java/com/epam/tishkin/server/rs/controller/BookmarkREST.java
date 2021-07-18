@@ -1,4 +1,4 @@
-package com.epam.tishkin.server.rs.resource;
+package com.epam.tishkin.server.rs.controller;
 
 import com.epam.tishkin.models.Bookmark;
 import com.epam.tishkin.server.rs.config.TokenManager;
