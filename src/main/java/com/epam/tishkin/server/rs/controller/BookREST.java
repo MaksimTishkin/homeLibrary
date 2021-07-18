@@ -1,5 +1,6 @@
 package com.epam.tishkin.server.rs.controller;
 
+import com.epam.tishkin.client.LibraryClient;
 import com.epam.tishkin.models.Book;
 import com.epam.tishkin.models.BooksList;
 import com.epam.tishkin.server.rs.filter.UserAuth;
@@ -8,12 +9,17 @@ import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
+import org.glassfish.jersey.media.multipart.FormDataParam;
 
-import java.io.File;
+import java.io.*;
 import java.util.List;
 
 @Path("/books")
 public class BookREST {
+    final static Logger logger = LogManager.getLogger(BookREST.class);
 
     @Inject
     private LibraryService libraryService;
@@ -45,11 +51,22 @@ public class BookREST {
     @Path("/add-from-catalog")
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response addBooksFromCatalog(File file) {
-        System.out.println(file);
-        System.out.println(file.getName());
+    public Response addBooksFromCatalog(
+            @FormDataParam("file") InputStream fileInputStream,
+            @FormDataParam("file") FormDataContentDisposition fileMetaData) {
+        File file = new File("src/main/resources/" + fileMetaData.getFileName());
+        try (OutputStream out = new FileOutputStream(file)) {
+            int read;
+            byte[] bytes = new byte[1024];
+            while ((read = fileInputStream.read(bytes)) != -1) {
+                out.write(bytes, 0, read);
+            }
+            out.flush();
+        } catch (IOException e) {
+            logger.error(e.getMessage());
+        }
         int booksAdded = libraryService.addBooksFromCatalog(file);
-        return Response.status(200).entity(booksAdded).build();
+        return Response.status(200).entity(Integer.toString(booksAdded)).build();
     }
 
     @UserAuth

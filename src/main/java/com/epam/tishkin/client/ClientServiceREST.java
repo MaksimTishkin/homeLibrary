@@ -7,6 +7,9 @@ import jakarta.ws.rs.client.ClientBuilder;
 import jakarta.ws.rs.client.Entity;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import org.glassfish.jersey.media.multipart.FormDataMultiPart;
+import org.glassfish.jersey.media.multipart.MultiPartFeature;
+import org.glassfish.jersey.media.multipart.file.FileDataBodyPart;
 
 import java.io.File;
 import java.util.List;
@@ -14,7 +17,7 @@ import java.util.List;
 public class ClientServiceREST {
     private static final String REST_URI = "http://localhost:8083/homeLibrary/";
     private static final String AUTHORIZATION_PROPERTY = "token";
-    private final Client client = ClientBuilder.newClient();
+    private final Client client = ClientBuilder.newClient().register(MultiPartFeature.class);
 
     public String authorization(String login, String password) {
         Response response = client
@@ -95,19 +98,20 @@ public class ClientServiceREST {
         return response.getStatus() == 200;
     }
 
-    public Integer addBooksFromCatalog(File file, String jwt) throws AccessDeniedException {
-        System.out.println(file);
-        System.out.println(file.getName());
+    public String addBooksFromCatalog(String filePath, String jwt) throws AccessDeniedException {
+        final FileDataBodyPart filePart = new FileDataBodyPart("file", new File(filePath));
+        FormDataMultiPart formDataMultiPart = new FormDataMultiPart();
+        final FormDataMultiPart multipart = (FormDataMultiPart) formDataMultiPart.bodyPart(filePart);
         Response response = client
                 .target(REST_URI)
                 .path("books/add-from-catalog")
                 .request(MediaType.APPLICATION_JSON)
                 .cookie(AUTHORIZATION_PROPERTY, jwt)
-                .post(Entity.entity(file, MediaType.APPLICATION_OCTET_STREAM));
+                .post(Entity.entity(multipart, multipart.getMediaType()));
         if (response.getStatus() == 403) {
             throw new AccessDeniedException("access denied");
         }
-        return response.readEntity(Integer.class);
+        return response.readEntity(String.class);
     }
 
     public List<Book> searchBookForTitle(String title, String jwt) throws AccessDeniedException {

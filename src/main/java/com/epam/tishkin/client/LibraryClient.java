@@ -211,8 +211,7 @@ public class LibraryClient {
         String filePath = reader.readLine();
         try {
             if (isFileExtensionCorrect(filePath)) {
-                File file = new File(filePath);
-                int booksAdded = clientServiceREST.addBooksFromCatalog(file, jwt);
+                String booksAdded = clientServiceREST.addBooksFromCatalog(filePath, jwt);
                 logger.info("Number of books added from catalog: " + booksAdded);
             } else {
                 logger.info("Incorrect file's type");
