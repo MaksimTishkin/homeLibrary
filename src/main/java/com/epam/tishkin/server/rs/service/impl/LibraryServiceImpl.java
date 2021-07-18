@@ -3,7 +3,7 @@ package com.epam.tishkin.server.rs.service.impl;
 import com.epam.tishkin.models.Book;
 import com.epam.tishkin.models.Bookmark;
 import com.epam.tishkin.models.User;
-import com.epam.tishkin.server.dao.HistoryManager;
+import com.epam.tishkin.server.rs.config.HistoryManager;
 import com.epam.tishkin.server.dao.LibraryDAO;
 import com.epam.tishkin.server.dao.impl.LibraryDAOImpl;
 import com.epam.tishkin.server.rs.service.LibraryService;

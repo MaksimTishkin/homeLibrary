@@ -1,7 +1,6 @@
 package com.epam.tishkin.server.dao.impl;
 
 import com.epam.tishkin.server.dao.HibernateUtil;
-import com.epam.tishkin.server.dao.HistoryManager;
 import com.epam.tishkin.server.dao.LibraryDAO;
 import com.epam.tishkin.models.*;
 import com.google.gson.Gson;
@@ -26,7 +25,6 @@ public class LibraryDAOImpl implements LibraryDAO {
             User user = session.get(User.class, login);
             if (user != null) {
                 if (user.getPassword().equals(password)) {
-                    HistoryManager.write(login, " is connected");
                     return user;
                 }
             }

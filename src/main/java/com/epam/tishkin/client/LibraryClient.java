@@ -3,13 +3,10 @@ package com.epam.tishkin.client;
 import com.epam.tishkin.client.exception.AccessDeniedException;
 import com.epam.tishkin.models.Book;
 import com.epam.tishkin.models.Bookmark;
-import com.epam.tishkin.server.rs.service.LibraryService;
-import com.epam.tishkin.server.rs.service.impl.LibraryServiceImpl;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.time.Year;
@@ -20,7 +17,6 @@ public class LibraryClient {
     final static Logger logger = LogManager.getLogger(LibraryClient.class);
     private String jwt;
     private String role;
-    LibraryService libraryService = new LibraryServiceImpl();
 
     public static void main(String[] args) {
         new LibraryClient().run();

@@ -1,10 +1,12 @@
 package com.epam.tishkin.server.rs.controller;
 
-import com.epam.tishkin.client.LibraryClient;
 import com.epam.tishkin.models.Book;
 import com.epam.tishkin.models.BooksList;
+import com.epam.tishkin.server.rs.config.HistoryManager;
+import com.epam.tishkin.server.rs.config.TokenManager;
 import com.epam.tishkin.server.rs.filter.UserAuth;
 import com.epam.tishkin.server.rs.service.LibraryService;
+
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
@@ -19,7 +21,9 @@ import java.util.List;
 
 @Path("/books")
 public class BookREST {
+    private static final String AUTHORIZATION_PROPERTY = "token";
     final static Logger logger = LogManager.getLogger(BookREST.class);
+    final TokenManager tokenManager = new TokenManager();
 
     @Inject
     private LibraryService libraryService;
@@ -27,8 +31,12 @@ public class BookREST {
     @UserAuth
     @POST
     @Path("/add")
-    public Response addNewBook(Book book) {
+    public Response addNewBook(
+            @CookieParam(AUTHORIZATION_PROPERTY) String jwt,
+            Book book) {
         if (libraryService.addNewBook(book)) {
+            String login = tokenManager.getLoginFromJWT(jwt);
+            HistoryManager.write(login, "New book added: " + book.getTitle());
             return Response.status(200).build();
         }
         return Response.status(404).build();
@@ -39,8 +47,11 @@ public class BookREST {
     @Path("/delete/{authorName}/{bookTitle}")
     public Response deleteBook(
             @PathParam("authorName") String authorName,
-            @PathParam("bookTitle") String bookTitle) {
+            @PathParam("bookTitle") String bookTitle,
+            @CookieParam(AUTHORIZATION_PROPERTY) String jwt) {
         if (libraryService.deleteBook(authorName, bookTitle)) {
+            String login = tokenManager.getLoginFromJWT(jwt);
+            HistoryManager.write(login, "book deleted: " + bookTitle);
             return Response.status(200).build();
         }
         return Response.status(404).build();
@@ -62,10 +73,15 @@ public class BookREST {
                 out.write(bytes, 0, read);
             }
             out.flush();
+
         } catch (IOException e) {
             logger.error(e.getMessage());
         }
         int booksAdded = libraryService.addBooksFromCatalog(file);
+        boolean isFileDeleted = file.delete();
+        if (!isFileDeleted) {
+            logger.info(file.getName() + " not found");
+        }
         return Response.status(200).entity(Integer.toString(booksAdded)).build();
     }
 
