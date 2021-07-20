@@ -477,5 +477,3 @@ public class LibraryClient {
         }
     }
 }
-
-

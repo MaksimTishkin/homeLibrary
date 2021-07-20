@@ -20,3 +20,4 @@
         <mapping class="com.epam.tishkin.models.Author"/>
     </session-factory>
 </hibernate-configuration>
+

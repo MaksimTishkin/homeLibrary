@@ -9,6 +9,7 @@ import java.io.Serializable;
 @Entity
 @Table (name = "Book")
 @XmlRootElement
+
 public class Book implements Serializable {
     private static final long serialVersionUID = 965896523L;
     @Id

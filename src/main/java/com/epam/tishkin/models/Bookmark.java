@@ -13,6 +13,7 @@ public class Bookmark implements Serializable {
     private final static long serialVersionUID = 98745874L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @XmlTransient
     private int id;
     @Column(name = "Book_title")
     @XmlElement
@@ -29,9 +30,10 @@ public class Bookmark implements Serializable {
 
     }
 
-    public Bookmark(String title, int page) {
+    public Bookmark(String title, int page, User user) {
         this.title = title;
         this.page = page;
+        this.user = user;
     }
 
     public Bookmark(String title, int page, User user) {
