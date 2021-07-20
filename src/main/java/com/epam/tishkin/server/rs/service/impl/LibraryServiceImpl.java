@@ -47,33 +47,33 @@ public class LibraryServiceImpl implements LibraryService {
     }
 
     @Override
-    public List<Book> searchBookForTitle(String title) {
-        return libraryDAO.searchBookForTitle(title);
+    public List<Book> getBooksByTitle(String title) {
+        return libraryDAO.getBooksByTitle(title);
     }
 
     @Override
-    public List<Book> searchBooksForAuthor(String authorName) {
-        return libraryDAO.searchBooksForAuthor(authorName);
+    public List<Book> getBooksByAuthor(String authorName) {
+        return libraryDAO.getBooksByAuthor(authorName);
     }
 
     @Override
-    public Book searchBookForISBN(String isbn) {
-        return libraryDAO.searchBookForISBN(isbn);
+    public Book getBookByISBN(String isbn) {
+        return libraryDAO.getBookByISBN(isbn);
     }
 
     @Override
-    public List<Book> searchBooksByYearRange(int startYear, int finishYear) {
-        return libraryDAO.searchBooksByYearRange(startYear, finishYear);
+    public List<Book> getBooksByYearRange(int startYear, int finishYear) {
+        return libraryDAO.getBooksByYearRange(startYear, finishYear);
     }
 
     @Override
-    public List<Book> searchBookByYearPagesNumberAndTitle(int year, int pages, String title) {
-        return libraryDAO.searchBookByYearPagesNumberAndTitle(year, pages, title);
+    public List<Book> getBooksByYearPagesNumberAndTitle(int year, int pages, String title) {
+        return libraryDAO.getBooksByYearPagesNumberAndTitle(year, pages, title);
     }
 
     @Override
-    public Book findBookByFullTitle(String bookTitle) {
-        return libraryDAO.findBookByFullTitle(bookTitle);
+    public Book getBookByFullTitle(String bookTitle) {
+        return libraryDAO.getBookByFullTitle(bookTitle);
     }
 
     @Override
@@ -87,8 +87,8 @@ public class LibraryServiceImpl implements LibraryService {
     }
 
     @Override
-    public List<Bookmark> showBooksWithBookmarks(String login) {
-        return  libraryDAO.showBooksWithBookmarks(login);
+    public List<Bookmark> getBookmarks(String login) {
+        return  libraryDAO.getBookmarks(login);
     }
 
     @Override

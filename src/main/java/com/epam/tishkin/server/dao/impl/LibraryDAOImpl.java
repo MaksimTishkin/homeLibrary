@@ -94,7 +94,7 @@ public class LibraryDAOImpl implements LibraryDAO {
         }
     }
 
-    public List<Bookmark> showBooksWithBookmarks(String userLogin) {
+    public List<Bookmark> getBookmarks(String userLogin) {
         try (Session session = HibernateUtil.getSession()) {
             Query<Bookmark> query = session.createQuery("FROM Bookmark WHERE User_login =: login", Bookmark.class);
             query.setParameter("login", userLogin);
@@ -216,7 +216,7 @@ public class LibraryDAOImpl implements LibraryDAO {
         return count[0];
     }
 
-    public List<Book> searchBookForTitle(String title) {
+    public List<Book> getBooksByTitle(String title) {
         try (Session session = HibernateUtil.getSession()) {
             Query<Book> query = session.createQuery("FROM Book WHERE Title LIKE :name", Book.class);
             query.setParameter("name", "%" + title + "%");
@@ -224,7 +224,7 @@ public class LibraryDAOImpl implements LibraryDAO {
         }
     }
 
-    public List<Book> searchBooksForAuthor(String authorName) {
+    public List<Book> getBooksByAuthor(String authorName) {
         try (Session session = HibernateUtil.getSession()) {
             Query<Book> query = session.createQuery("FROM Book WHERE Author_Name LIKE :name", Book.class);
             query.setParameter("name", "%" + authorName + "%");
@@ -232,7 +232,7 @@ public class LibraryDAOImpl implements LibraryDAO {
         }
     }
 
-    public Book searchBookForISBN(String ISBNumber) {
+    public Book getBookByISBN(String ISBNumber) {
         Book book = null;
         try (Session session = HibernateUtil.getSession()) {
             Query<Book> query = session.createQuery("FROM Book WHERE ISBNumber =:number", Book.class);
@@ -245,7 +245,7 @@ public class LibraryDAOImpl implements LibraryDAO {
         return book;
     }
 
-    public List<Book> searchBookByYearPagesNumberAndTitle(int year, int pages, String title) {
+    public List<Book> getBooksByYearPagesNumberAndTitle(int year, int pages, String title) {
         try (Session session = HibernateUtil.getSession()) {
             Query<Book> query = session.createQuery("FROM Book WHERE publicationYear =:year " +
                     "and pagesNumber =:pages and title LIKE :title", Book.class);
@@ -256,7 +256,7 @@ public class LibraryDAOImpl implements LibraryDAO {
         }
     }
 
-    public List<Book> searchBooksByYearRange(int startYear, int finishYear) {
+    public List<Book> getBooksByYearRange(int startYear, int finishYear) {
         try (Session session = HibernateUtil.getSession()) {
             Query<Book> query = session.createQuery("FROM Book WHERE publicationYear BETWEEN :startYear and :finishYear", Book.class);
             query.setParameter("startYear", startYear);
@@ -265,7 +265,7 @@ public class LibraryDAOImpl implements LibraryDAO {
         }
     }
 
-    public Book findBookByFullTitle(String title) {
+    public Book getBookByFullTitle(String title) {
         Book book = null;
         try (Session session = HibernateUtil.getSession()) {
             Query<Book> query = session.createQuery("FROM Book where title =:title", Book.class);

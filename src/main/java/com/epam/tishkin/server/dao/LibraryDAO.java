@@ -13,16 +13,16 @@ public interface LibraryDAO {
     boolean blockUser(String login);
     boolean addBookmark(Bookmark newBookmark, String login);
     boolean deleteBookmark(String bookTitle, String login);
-    List<Bookmark> showBooksWithBookmarks(String userLogin);
+    List<Bookmark> getBookmarks(String userLogin);
     boolean addBook(Book book);
     boolean deleteBook(String authorName, String title);
     boolean addAuthor(String authorName);
     boolean deleteAuthor(String authorName);
     int addBooksFromCatalog(File file);
-    List<Book> searchBookForTitle(String title);
-    List<Book> searchBooksForAuthor(String authorName);
-    Book searchBookForISBN(String ISBNumber);
-    List<Book> searchBooksByYearRange(int startYear, int finishYear);
-    List<Book> searchBookByYearPagesNumberAndTitle(int year, int pages, String title);
-    Book findBookByFullTitle(String title);
+    List<Book> getBooksByTitle(String title);
+    List<Book> getBooksByAuthor(String authorName);
+    Book getBookByISBN(String ISBNumber);
+    List<Book> getBooksByYearRange(int startYear, int finishYear);
+    List<Book> getBooksByYearPagesNumberAndTitle(int year, int pages, String title);
+    Book getBookByFullTitle(String title);
 }

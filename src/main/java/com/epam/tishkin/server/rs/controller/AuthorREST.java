@@ -12,7 +12,6 @@ import jakarta.ws.rs.core.Response;
 
 @Path("/authors")
 public class AuthorREST {
-    private static final String AUTHORIZATION_PROPERTY = "token";
     final TokenManager tokenManager = new TokenManager();
 
     @Inject
@@ -22,7 +21,7 @@ public class AuthorREST {
     @POST
     @Path("/add")
     public Response addAuthor(
-            @CookieParam(AUTHORIZATION_PROPERTY) String jwt,
+            @CookieParam(TokenManager.AUTHORIZATION_PROPERTY) String jwt,
             Author author) {
         if (libraryService.addAuthor(author.getName())) {
             String login = tokenManager.getLoginFromJWT(jwt);
@@ -37,7 +36,7 @@ public class AuthorREST {
     @Path("/delete/{authorName}")
     public Response deleteAuthor(
             @PathParam("authorName") String authorName,
-            @CookieParam(AUTHORIZATION_PROPERTY) String jwt) {
+            @CookieParam(TokenManager.AUTHORIZATION_PROPERTY) String jwt) {
         if (libraryService.deleteAuthor(authorName)) {
             String login = tokenManager.getLoginFromJWT(jwt);
             HistoryManager.write(login, "author deleted: " + authorName);

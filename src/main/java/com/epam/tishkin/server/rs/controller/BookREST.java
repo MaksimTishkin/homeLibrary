@@ -21,7 +21,6 @@ import java.util.List;
 
 @Path("/books")
 public class BookREST {
-    private static final String AUTHORIZATION_PROPERTY = "token";
     final static Logger logger = LogManager.getLogger(BookREST.class);
     final TokenManager tokenManager = new TokenManager();
 
@@ -32,7 +31,7 @@ public class BookREST {
     @POST
     @Path("/add")
     public Response addNewBook(
-            @CookieParam(AUTHORIZATION_PROPERTY) String jwt,
+            @CookieParam(TokenManager.AUTHORIZATION_PROPERTY) String jwt,
             Book book) {
         if (libraryService.addNewBook(book)) {
             String login = tokenManager.getLoginFromJWT(jwt);
@@ -48,7 +47,7 @@ public class BookREST {
     public Response deleteBook(
             @PathParam("authorName") String authorName,
             @PathParam("bookTitle") String bookTitle,
-            @CookieParam(AUTHORIZATION_PROPERTY) String jwt) {
+            @CookieParam(TokenManager.AUTHORIZATION_PROPERTY) String jwt) {
         if (libraryService.deleteBook(authorName, bookTitle)) {
             String login = tokenManager.getLoginFromJWT(jwt);
             HistoryManager.write(login, "book deleted: " + bookTitle);
@@ -87,68 +86,68 @@ public class BookREST {
 
     @UserAuth
     @GET
-    @Path("/search-for-title/{title}")
+    @Path("/get-by-title/{title}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response searchBookForTitle(@PathParam("title") String title) {
+    public Response getBooksByTitle(@PathParam("title") String title) {
         BooksList booksList = new BooksList();
-        List<Book> foundBooks = libraryService.searchBookForTitle(title);
+        List<Book> foundBooks = libraryService.getBooksByTitle(title);
         booksList.setBooks(foundBooks);
         return Response.status(200).entity(booksList).build();
     }
 
     @UserAuth
     @GET
-    @Path("/search-for-author/{bookAuthor}")
+    @Path("/get-by-author/{bookAuthor}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response searchBooksForAuthor(@PathParam("bookAuthor") String authorName) {
+    public Response getBooksByAuthor(@PathParam("bookAuthor") String authorName) {
         BooksList list = new BooksList();
-        List<Book> findBooks = libraryService.searchBooksForAuthor(authorName);
+        List<Book> findBooks = libraryService.getBooksByAuthor(authorName);
         list.setBooks(findBooks);
         return Response.status(200).entity(list).build();
     }
 
     @UserAuth
     @GET
-    @Path("/search-for-isbn/{isbn}")
+    @Path("/get-by-isbn/{isbn}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response searchBookForISBN(@PathParam("isbn") String isbn) {
-        Book book = libraryService.searchBookForISBN(isbn);
+    public Response getBooksForISBN(@PathParam("isbn") String isbn) {
+        Book book = libraryService.getBookByISBN(isbn);
         return Response.status(200).entity(book).build();
     }
 
     @UserAuth
     @GET
-    @Path("/search-for-years/{startYear}/{finishYear}")
+    @Path("/get-by-years/{startYear}/{finishYear}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response searchBooksByYearRange(
+    public Response getBooksByYearRange(
             @PathParam("startYear") Integer startYear,
             @PathParam("finishYear") Integer finishYear) {
         BooksList list = new BooksList();
-        List<Book> findBooks = libraryService.searchBooksByYearRange(startYear, finishYear);
+        List<Book> findBooks = libraryService.getBooksByYearRange(startYear, finishYear);
         list.setBooks(findBooks);
         return Response.status(200).entity(list).build();
     }
 
     @UserAuth
     @GET
-    @Path("/search-for-year-pages-title/{year}/{pages}/{title}")
+    @Path("/get-by-year-pages-title/{year}/{pages}/{title}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response searchBookByYearPagesNumberAndTitle(
+    public Response getBooksByYearPagesNumberAndTitle(
             @PathParam("year") Integer year,
             @PathParam("pages") Integer pages,
             @PathParam("title") String title) {
         BooksList list = new BooksList();
-        List<Book> findBooks = libraryService.searchBookByYearPagesNumberAndTitle(year, pages, title);
+        List<Book> findBooks = libraryService.getBooksByYearPagesNumberAndTitle(year, pages, title);
         list.setBooks(findBooks);
         return Response.status(200).entity(list).build();
     }
 
     @UserAuth
     @GET
-    @Path("/search-by-full-title/{bookTitle}")
+    @Path("/get-by-full-title/{bookTitle}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response findBookByFullTitle(@PathParam("bookTitle") String bookTitle) {
-        Book book = libraryService.findBookByFullTitle(bookTitle);
+    public Response getBookByFullTitle(@PathParam("bookTitle") String bookTitle) {
+        Book book = libraryService.getBookByFullTitle(bookTitle);
         return Response.status(200).entity(book).build();
     }
 }

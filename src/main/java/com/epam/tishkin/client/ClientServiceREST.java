@@ -24,9 +24,9 @@ public class ClientServiceREST {
                 .target(REST_URI)
                 .path("users/authorization/")
                 .request(MediaType.TEXT_PLAIN)
-                .cookie("login", login)
-                .cookie("password", password)
-                .get();
+                .header("login", login)
+                .header("password", password)
+                .post(Entity.entity("This is authorization", MediaType.TEXT_PLAIN));
         if (response.getStatus() == 401) {
             return null;
         }
@@ -117,7 +117,7 @@ public class ClientServiceREST {
     public List<Book> searchBookForTitle(String title, String jwt) throws AccessDeniedException {
         Response response = client
                 .target(REST_URI)
-                .path("books/search-for-title/" + title)
+                .path("books/get-by-title/" + title)
                 .request(MediaType.APPLICATION_JSON)
                 .cookie(AUTHORIZATION_PROPERTY, jwt)
                 .get();
@@ -130,7 +130,7 @@ public class ClientServiceREST {
     public List<Book> searchBooksForAuthor(String bookAuthor, String jwt) throws AccessDeniedException {
         Response response = client
                 .target(REST_URI)
-                .path("books/search-for-author/" + bookAuthor)
+                .path("books/get-by-author/" + bookAuthor)
                 .request(MediaType.APPLICATION_JSON)
                 .cookie(AUTHORIZATION_PROPERTY, jwt)
                 .get();
@@ -143,7 +143,7 @@ public class ClientServiceREST {
     public Book searchBookForISBN(String isbn, String jwt) throws AccessDeniedException {
         Response response = client
                 .target(REST_URI)
-                .path("books/search-for-isbn/" + isbn)
+                .path("books/get-by-isbn/" + isbn)
                 .request(MediaType.APPLICATION_JSON)
                 .cookie(AUTHORIZATION_PROPERTY, jwt)
                 .get();
@@ -156,7 +156,7 @@ public class ClientServiceREST {
     public List<Book> searchBooksByYearRange(int startYear, int finishYear, String jwt) throws AccessDeniedException {
         Response response = client
                 .target(REST_URI)
-                .path("books/search-for-years/" + startYear + "/" + finishYear)
+                .path("books/get-by-years/" + startYear + "/" + finishYear)
                 .request(MediaType.APPLICATION_JSON)
                 .cookie(AUTHORIZATION_PROPERTY, jwt)
                 .get();
@@ -169,7 +169,7 @@ public class ClientServiceREST {
     public List<Book> searchBookByYearPagesNumberAndTitle(int year, int pages, String title, String jwt) throws AccessDeniedException {
         Response response = client
                 .target(REST_URI)
-                .path("books/search-for-year-pages-title/" + year + "/" + pages + "/" + title)
+                .path("books/get-by-year-pages-title/" + year + "/" + pages + "/" + title)
                 .request(MediaType.APPLICATION_JSON)
                 .cookie(AUTHORIZATION_PROPERTY, jwt)
                 .get();
@@ -182,7 +182,7 @@ public class ClientServiceREST {
     public Book findBookByFullTitle(String bookTitle, String jwt) throws AccessDeniedException {
         Response response = client
                 .target(REST_URI)
-                .path("books/search-by-full-title/" + bookTitle)
+                .path("books/get-by-full-title/" + bookTitle)
                 .request(MediaType.APPLICATION_JSON)
                 .cookie(AUTHORIZATION_PROPERTY, jwt)
                 .get();
@@ -222,7 +222,7 @@ public class ClientServiceREST {
     public List<Bookmark> showBooksWithBookmarks(String jwt) throws AccessDeniedException {
         Response response = client
                 .target(REST_URI)
-                .path("users/show-bookmarks")
+                .path("users/get-bookmarks")
                 .request(MediaType.APPLICATION_JSON)
                 .cookie(AUTHORIZATION_PROPERTY, jwt)
                 .get();

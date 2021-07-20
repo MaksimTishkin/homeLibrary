@@ -11,6 +11,7 @@ import java.security.Key;
 
 public class TokenManager {
     private final static Key KEY;
+    public static final String AUTHORIZATION_PROPERTY = "token";
     private final static String LOGIN_PARAM = "login";
     private final static String ROLE_PARAM = "role";
 

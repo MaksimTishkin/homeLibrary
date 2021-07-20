@@ -12,7 +12,6 @@ import jakarta.ws.rs.core.Response;
 
 @Path("/bookmarks")
 public class BookmarkREST {
-    private static final String AUTHORIZATION_PROPERTY = "token";
     private final TokenManager tokenManager = new TokenManager();
 
     @Inject
@@ -22,7 +21,7 @@ public class BookmarkREST {
     @POST
     @Path("/add")
     public Response addBookmark(
-            @CookieParam(AUTHORIZATION_PROPERTY) String jwt,
+            @CookieParam(TokenManager.AUTHORIZATION_PROPERTY) String jwt,
             Bookmark bookmark) {
         String login = tokenManager.getLoginFromJWT(jwt);
         if (libraryService.addBookmark(bookmark, login)) {
@@ -38,7 +37,7 @@ public class BookmarkREST {
     @Path("/delete/{bookTitle}")
     public Response deleteBookmark(
             @PathParam("bookTitle") String bookTitle,
-            @CookieParam(AUTHORIZATION_PROPERTY) String jwt) {
+            @CookieParam(TokenManager.AUTHORIZATION_PROPERTY) String jwt) {
         String login = tokenManager.getLoginFromJWT(jwt);
         if (libraryService.deleteBookmark(bookTitle, login)) {
             HistoryManager.write(login, "bookmark deleted from book: " + bookTitle);

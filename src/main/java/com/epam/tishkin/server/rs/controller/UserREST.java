@@ -21,41 +21,40 @@ import java.util.List;
 
 @Path("/users")
 public class UserREST {
-    private static final String AUTHORIZATION_PROPERTY = "token";
     private final TokenManager tokenManager = new TokenManager();
 
     @Inject
     private LibraryService libraryService;
 
-    @GET
+    @POST
     @Path("/authorization")
     public Response authorization(
-            @CookieParam("login") String login,
-            @CookieParam("password") String password) {
+            @HeaderParam("login") String login,
+            @HeaderParam("password") String password) {
        User user = libraryService.authorization(login, password);
        if (user == null) {
            return Response.status(401).build();
        }
        String jwt = tokenManager.createToken(user);
        HistoryManager.write(login, "is connected");
-       return Response.status(200).cookie(new NewCookie(AUTHORIZATION_PROPERTY, jwt)).build();
+       return Response.status(200).cookie(new NewCookie(TokenManager.AUTHORIZATION_PROPERTY, jwt)).build();
     }
 
     @GET
     @Path("/role")
-    public Response getRole(@CookieParam(AUTHORIZATION_PROPERTY) Cookie jwt) {
+    public Response getRole(@CookieParam(TokenManager.AUTHORIZATION_PROPERTY) Cookie jwt) {
         String role = tokenManager.getRoleFromJWT(jwt.getValue());
         return Response.status(200).entity(role).build();
     }
 
     @UserAuth
     @GET
-    @Path("/show-bookmarks")
+    @Path("/get-bookmarks")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response showBooksWithBookmarks(@CookieParam(AUTHORIZATION_PROPERTY) String jwt) {
+    public Response getBookmarks(@CookieParam(TokenManager.AUTHORIZATION_PROPERTY) String jwt) {
         String login = tokenManager.getLoginFromJWT(jwt);
         BookmarksList list = new BookmarksList();
-        List<Bookmark> foundBookmarks = libraryService.showBooksWithBookmarks(login);
+        List<Bookmark> foundBookmarks = libraryService.getBookmarks(login);
         list.setBookmarks(foundBookmarks);
         return Response.status(200).entity(list).build();
     }
