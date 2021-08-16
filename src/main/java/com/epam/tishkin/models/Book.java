@@ -1,7 +1,5 @@
 package com.epam.tishkin.models;
 
-import jakarta.xml.bind.annotation.XmlAccessType;
-import jakarta.xml.bind.annotation.XmlAccessorType;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlRootElement;
 
@@ -10,27 +8,28 @@ import java.io.Serializable;
 
 @Entity
 @Table (name = "Book")
-@XmlAccessorType(XmlAccessType.FIELD)
-@XmlRootElement()
+@XmlRootElement
+
 public class Book implements Serializable {
     private static final long serialVersionUID = 965896523L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
     @Column(name = "Title")
-    @XmlElement()
+    @XmlElement
     private String title;
     @Column(name = "ISBNumber")
-    @XmlElement()
+    @XmlElement
     private String ISBNumber;
     @Column(name = "Publication_Year")
-    @XmlElement()
+    @XmlElement
     private int publicationYear;
     @Column(name = "Pages_Number")
-    @XmlElement()
+    @XmlElement
     private int pagesNumber;
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "Author_name")
+    @XmlElement
     private Author author;
 
     public Book() {

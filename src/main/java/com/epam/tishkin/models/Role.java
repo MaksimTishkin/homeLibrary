@@ -1,14 +1,10 @@
 package com.epam.tishkin.models;
 
-import jakarta.xml.bind.annotation.XmlEnum;
-import jakarta.xml.bind.annotation.XmlEnumValue;
-import jakarta.xml.bind.annotation.XmlType;
+import jakarta.xml.bind.annotation.XmlRootElement;
 
-@XmlType(name = "role")
-@XmlEnum
+@XmlRootElement
 public enum Role {
     @XmlEnumValue("ADMINISTRATOR")
     ADMINISTRATOR,
-    @XmlEnumValue("VISITOR")
     VISITOR
 }

@@ -1,7 +1,6 @@
 package com.epam.tishkin.server.dao.impl;
 
 import com.epam.tishkin.server.dao.HibernateUtil;
-import com.epam.tishkin.server.dao.HistoryManager;
 import com.epam.tishkin.server.dao.LibraryDAO;
 import com.epam.tishkin.models.*;
 import com.google.gson.Gson;
@@ -21,28 +20,26 @@ import java.util.Optional;
 public class LibraryDAOImpl implements LibraryDAO {
     final static Logger logger = LogManager.getLogger(LibraryDAOImpl.class);
 
-    public Role userAuthorization(String login, String password) {
+    public User userAuthorization(String login, String password) {
         try (Session session = HibernateUtil.getSession()) {
             User user = session.get(User.class, login);
             if (user != null) {
                 if (user.getPassword().equals(password)) {
-                    HistoryManager.write(login, " is connected");
-                    return user.getRole();
+                    return user;
                 }
             }
         }
         return null;
     }
 
-    public boolean addUser(String login, String password) {
+    public boolean addUser(User user) {
         try (Session session = HibernateUtil.getSession()) {
             Transaction transaction = session.beginTransaction();
-            User visitor = session.get(User.class, login);
+            User visitor = session.get(User.class, user.getLogin());
             if (visitor != null) {
                 return false;
             }
-            visitor = new User(login, password, Role.VISITOR);
-            session.save(visitor);
+            session.save(user);
             transaction.commit();
             return true;
         }
@@ -61,36 +58,35 @@ public class LibraryDAOImpl implements LibraryDAO {
         }
     }
 
-    public boolean addBookmark(String login, String bookTitle, int pageNumber) {
+    public boolean addBookmark(Bookmark newBookmark, String login) {
         try (Session session = HibernateUtil.getSession()) {
             Transaction transaction = session.beginTransaction();
             User user = session.get(User.class, login);
-            Optional<Bookmark> bookmark = user.getBookmarks()
+            Query<Bookmark> query = session.createQuery("FROM Bookmark WHERE User_login =: user", Bookmark.class);
+            query.setParameter("user", login);
+            Optional<Bookmark> bookmark = query.getResultList()
                     .stream()
-                    .filter(b -> bookTitle.equals(b.getTitle()))
+                    .filter(b -> newBookmark.getTitle().equals(b.getTitle()))
                     .findFirst();
             if (bookmark.isPresent()) {
                 return false;
             }
-            Bookmark currentBookmark = new Bookmark(bookTitle, pageNumber, user);
-            session.save(currentBookmark);
+            newBookmark.setUser(user);
+            session.save(newBookmark);
             transaction.commit();
             return true;
         }
     }
 
-    public boolean deleteBookmark(String userLogin, String bookTitle) {
+    public boolean deleteBookmark(String bookTitle, String login) {
         try (Session session = HibernateUtil.getSession()) {
             Transaction transaction = session.beginTransaction();
-            Query<Bookmark> query = session.createQuery("FROM Bookmark WHERE User_login =: login", Bookmark.class);
-            query.setParameter("login", userLogin);
+            Query<Bookmark> query = session.createQuery("FROM Bookmark WHERE User_login =: login and Book_title =: title", Bookmark.class);
+            query.setParameter("login", login);
+            query.setParameter("title", bookTitle);
             List<Bookmark> foundBookmarks = query.getResultList();
-            Optional<Bookmark> bookmark = foundBookmarks
-                    .stream()
-                    .filter(b -> bookTitle.equals(b.getTitle()))
-                    .findFirst();
-            if (bookmark.isPresent()) {
-                session.delete(bookmark.get());
+            if (!foundBookmarks.isEmpty()) {
+                session.delete(foundBookmarks.get(0));
                 transaction.commit();
                 return true;
             }
@@ -98,7 +94,7 @@ public class LibraryDAOImpl implements LibraryDAO {
         }
     }
 
-    public List<Bookmark> showBooksWithBookmarks(String userLogin) {
+    public List<Bookmark> getBookmarks(String userLogin) {
         try (Session session = HibernateUtil.getSession()) {
             Query<Bookmark> query = session.createQuery("FROM Bookmark WHERE User_login =: login", Bookmark.class);
             query.setParameter("login", userLogin);
@@ -106,30 +102,30 @@ public class LibraryDAOImpl implements LibraryDAO {
         }
     }
 
-    public boolean addBook(String title, String ISBNumber, int year, int pages, String bookAuthor) {
+    public boolean addBook(Book book) {
         try (Session session = HibernateUtil.getSession()) {
             Transaction transaction = session.beginTransaction();
-            Author author = session.get(Author.class, bookAuthor);
+            Author author = session.get(Author.class, book.getAuthor().getName());
             if (author == null) {
-                author = new Author(bookAuthor);
-                session.save(author);
+                session.save(book.getAuthor());
             } else {
-                Optional<Book> currentBook = author.getBook()
+                Query<Book> query = session.createQuery("FROM Book WHERE Author_name =: name", Book.class);
+                query.setParameter("name", book.getAuthor().getName());
+                Optional<Book> currentBook = query.getResultList()
                         .stream()
-                        .filter(b -> title.equals(b.getTitle()))
+                        .filter(b -> book.getTitle().equals(b.getTitle()))
                         .findFirst();
                 if (currentBook.isPresent()) {
                     return false;
                 }
             }
-            Book book = new Book(title, ISBNumber, year, pages, author);
             session.save(book);
             transaction.commit();
             return true;
         }
     }
 
-    public boolean deleteBook(String title, String authorName) {
+    public boolean deleteBook(String authorName, String title) {
         try (Session session = HibernateUtil.getSession()) {
             Transaction transaction = session.beginTransaction();
             Query<Book> query = session.createQuery("FROM Book WHERE Author_Name =: author and Title =: bookTitle", Book.class);
@@ -193,7 +189,8 @@ public class LibraryDAOImpl implements LibraryDAO {
                 String ISBNumber = bookParameters[2];
                 int year = Integer.parseInt(bookParameters[3]);
                 int pagesNumber = Integer.parseInt(bookParameters[4]);
-                if (addBook(title, ISBNumber, year, pagesNumber, author)) {
+                Book book = new Book(title, ISBNumber, year, pagesNumber, new Author(author));
+                if (addBook(book)) {
                     count++;
                 }
             }
@@ -209,8 +206,7 @@ public class LibraryDAOImpl implements LibraryDAO {
             Gson gson = new Gson();
             BooksList list = gson.fromJson(reader, BooksList.class);
             list.getBooks().forEach(b -> {
-                if (addBook(b.getTitle(), b.getISBNumber(), b.getPublicationYear(),
-                        b.getPagesNumber(), b.getAuthor().getName())) {
+                if (addBook(b)) {
                     count[0]++;
                 }
             });
@@ -220,7 +216,7 @@ public class LibraryDAOImpl implements LibraryDAO {
         return count[0];
     }
 
-    public List<Book> searchBookForTitle(String title) {
+    public List<Book> getBooksByTitle(String title) {
         try (Session session = HibernateUtil.getSession()) {
             Query<Book> query = session.createQuery("FROM Book WHERE Title LIKE :name", Book.class);
             query.setParameter("name", "%" + title + "%");
@@ -228,7 +224,7 @@ public class LibraryDAOImpl implements LibraryDAO {
         }
     }
 
-    public List<Book> searchBooksForAuthor(String authorName) {
+    public List<Book> getBooksByAuthor(String authorName) {
         try (Session session = HibernateUtil.getSession()) {
             Query<Book> query = session.createQuery("FROM Book WHERE Author_Name LIKE :name", Book.class);
             query.setParameter("name", "%" + authorName + "%");
@@ -236,7 +232,7 @@ public class LibraryDAOImpl implements LibraryDAO {
         }
     }
 
-    public Book searchBookForISBN(String ISBNumber) {
+    public Book getBookByISBN(String ISBNumber) {
         Book book = null;
         try (Session session = HibernateUtil.getSession()) {
             Query<Book> query = session.createQuery("FROM Book WHERE ISBNumber =:number", Book.class);
@@ -249,7 +245,7 @@ public class LibraryDAOImpl implements LibraryDAO {
         return book;
     }
 
-    public List<Book> searchBookByYearPagesNumberAndTitle(int year, int pages, String title) {
+    public List<Book> getBooksByYearPagesNumberAndTitle(int year, int pages, String title) {
         try (Session session = HibernateUtil.getSession()) {
             Query<Book> query = session.createQuery("FROM Book WHERE publicationYear =:year " +
                     "and pagesNumber =:pages and title LIKE :title", Book.class);
@@ -260,7 +256,7 @@ public class LibraryDAOImpl implements LibraryDAO {
         }
     }
 
-    public List<Book> searchBooksByYearRange(int startYear, int finishYear) {
+    public List<Book> getBooksByYearRange(int startYear, int finishYear) {
         try (Session session = HibernateUtil.getSession()) {
             Query<Book> query = session.createQuery("FROM Book WHERE publicationYear BETWEEN :startYear and :finishYear", Book.class);
             query.setParameter("startYear", startYear);
@@ -269,7 +265,7 @@ public class LibraryDAOImpl implements LibraryDAO {
         }
     }
 
-    public Book findBookByFullTitle(String title) {
+    public Book getBookByFullTitle(String title) {
         Book book = null;
         try (Session session = HibernateUtil.getSession()) {
             Query<Book> query = session.createQuery("FROM Book where title =:title", Book.class);

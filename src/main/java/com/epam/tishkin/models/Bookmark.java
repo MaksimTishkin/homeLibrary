@@ -1,14 +1,14 @@
 package com.epam.tishkin.models;
 
-import jakarta.xml.bind.annotation.*;
+import jakarta.xml.bind.annotation.XmlElement;
+import jakarta.xml.bind.annotation.XmlRootElement;
 
 import javax.persistence.*;
 import java.io.Serializable;
 
 @Entity
 @Table(name = "Bookmark")
-@XmlAccessorType(XmlAccessType.FIELD)
-@XmlRootElement()
+@XmlRootElement
 public class Bookmark implements Serializable {
     private final static long serialVersionUID = 98745874L;
     @Id
@@ -16,17 +16,24 @@ public class Bookmark implements Serializable {
     @XmlTransient
     private int id;
     @Column(name = "Book_title")
-    @XmlElement()
+    @XmlElement
     private String title;
     @Column(name = "Page_number")
-    @XmlElement()
+    @XmlElement
     private int page;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "User_login")
+    @XmlElement
     private User user;
 
     public Bookmark() {
 
+    }
+
+    public Bookmark(String title, int page, User user) {
+        this.title = title;
+        this.page = page;
+        this.user = user;
     }
 
     public Bookmark(String title, int page, User user) {

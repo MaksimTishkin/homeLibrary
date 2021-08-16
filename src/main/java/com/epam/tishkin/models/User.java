@@ -1,6 +1,7 @@
 package com.epam.tishkin.models;
 
-import jakarta.xml.bind.annotation.*;
+import jakarta.xml.bind.annotation.XmlElement;
+import jakarta.xml.bind.annotation.XmlRootElement;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -8,22 +9,20 @@ import java.util.List;
 
 @Entity
 @Table (name = "User")
-@XmlAccessorType(XmlAccessType.FIELD)
-@XmlRootElement()
+@XmlRootElement
 public class User implements Serializable {
     private final static long serialVersionUID = 65896589L;
     @Id
     @Column (name = "Login")
-    @XmlElement()
+    @XmlElement
     private String login;
     @Column (name = "Password")
-    @XmlElement()
+    @XmlElement
     private String password;
     @Column (name = "Role")
     @Enumerated(EnumType.STRING)
+    @XmlElement
     private Role role;
-    @OneToMany(mappedBy = "user", orphanRemoval = true)
-    private List<Bookmark> bookmarks;
 
     public User() {
 
@@ -59,12 +58,5 @@ public class User implements Serializable {
     public void setRole(Role role) {
         this.role = role;
     }
-
-    public List<Bookmark> getBookmarks() {
-        return bookmarks;
-    }
-
-    public void setBookmarks(List<Bookmark> bookmarks) {
-        this.bookmarks = bookmarks;
-    }
 }
+
